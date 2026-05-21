@@ -55,8 +55,9 @@ def get_gemini_response(messages, api_key, resume_context=None):
 
     try:
         genai.configure(api_key=api_key)
+        # Using model_name guarantees it maps perfectly across older/newer library versions
         model = genai.GenerativeModel(
-            'gemini-1.5-flash',
+            model_name='gemini-1.5-flash',
             system_instruction=build_system_prompt(resume_context)
         )
         
