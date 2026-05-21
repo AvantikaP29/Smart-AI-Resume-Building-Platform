@@ -3,15 +3,12 @@ AI Chatbot Utility
 Career guidance chatbot using Google Gemini API.
 Falls back to rule-based responses if API key not available.
 """
-
 import os
 import re
 from typing import List, Dict, Optional
 
 try:
     import google.generativeai as genai
-    # 🔥 FORCE GLOBAL RAILS ONTO THE PRODUCTION API (PREVENTS v1beta 404)
-    genai.client._api_version = 'v1'
     GEMINI_AVAILABLE = True
 except ImportError:
     GEMINI_AVAILABLE = False
@@ -55,10 +52,15 @@ def get_gemini_response(
         return get_fallback_response(messages[-1]["content"] if messages else "")
 
     try:
-        # Re-configure the API key safely
+        # Initialize configuration
         genai.configure(api_key=api_key)
         
-        # Initialize the model 
+        # Overriding the API client version explicitly to bypass the v1beta 404 issue permanently
+        from google.generativeai import client
+        api_client = client.get_default_api_client()
+        api_client.api_version = "v1"
+        
+        # Initialize the model attached to the forced v1 client
         model = genai.GenerativeModel(
             model_name='gemini-1.5-flash',
             system_instruction=build_system_prompt(resume_context)
@@ -152,20 +154,20 @@ Linux → Networking → Docker → Kubernetes → CI/CD → Terraform
 • 🤖 fast.ai — Practical deep learning"""
 
     elif any(w in msg for w in ["salary", "pay", "compensation"]):
-        return """**Salary Benchmarks (USD/year, varies by location):**
+        return """**Salary Benchmarks (INR per annum — Lakhs Per Annum / LPA):**
 
-| Role | Entry | Mid | Senior |
-|------|-------|-----|--------|
-| Data Scientist | $70K | $95K | $140K |
-| ML Engineer | $90K | $120K | $160K |
-| Web Developer | $55K | $80K | $120K |
-| DevOps Engineer | $75K | $100K | $145K |
-| Cloud Engineer | $80K | $110K | $150K |
+| Role | Entry Level | Mid Level | Senior Level |
+|------|-------------|-----------|--------------|
+| Data Scientist | ₹6.5 Lakhs | ₹14.0 Lakhs | ₹24.0+ Lakhs |
+| ML Engineer | ₹8.0 Lakhs | ₹16.5 Lakhs | ₹28.0+ Lakhs |
+| Web Developer | ₹4.5 Lakhs | ₹9.5 Lakhs | ₹18.0+ Lakhs |
+| DevOps Engineer | ₹6.0 Lakhs | ₹12.0 Lakhs | ₹22.0+ Lakhs |
+| Cloud Engineer | ₹7.0 Lakhs | ₹13.5 Lakhs | ₹25.0+ Lakhs |
 
 **Negotiation Tips:**
-• Research market rates on Glassdoor/Levels.fyi
-• Don't reveal current salary first
-• Negotiate total comp: base + equity + benefits"""
+• Research market rates on AmbitionBox, Glassdoor, or Levels.fyi (India specific metrics)
+• Do not reveal your current CTC or expected CTC figures in the initial HR rounds
+• Evaluate the complete package component layout: Fixed Base Pay + Performance Variable Bonus + RSUs/Esops"""
 
     elif any(w in msg for w in ["project", "portfolio", "idea"]):
         return """**Portfolio Project Ideas by Role:**
