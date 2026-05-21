@@ -181,12 +181,9 @@ def tokenize_and_lemmatize(text: str) -> List[str]:
 
 # ─── INFORMATION EXTRACTION ──────────────────────────────────────────────────
 
-import re
-
-def extract_email(text):
-    # This catches emails even if PDF extraction adds weird spacing
-    email_pattern = r'[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}'
-    match = re.search(email_pattern, text)
+def extract_email(text: str) -> Optional[str]:
+    pattern = r'[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}'
+    match = re.search(pattern, text)
     return match.group(0) if match else None
 
 
@@ -197,18 +194,51 @@ def extract_phone(text: str) -> Optional[str]:
     return match.group().strip() if match else None
 
 
+import re
+from typing import Optional
+
 def extract_linkedin(text: str) -> Optional[str]:
-    """Extract LinkedIn URL from text."""
-    pattern = r"linkedin\.com/in/[\w\-]+"
+    """Extract LinkedIn URL or mention from text."""
+    if not text:
+        return None
+        
+    # 1. Try to find a structured URL (handles www, http, trailing slashes, and complex usernames)
+    pattern = r"(?:https?://)?(?:www\.)?linkedin\.com/in/[\w\-]+(?:/[\w\-]+)*"
     match = re.search(pattern, text, re.IGNORECASE)
-    return f"https://{match.group()}" if match else None
+    if match:
+        url = match.group()
+        if not url.lower().startswith('http'):
+            url = f"https://{url}"
+        return url
+        
+    # 2. Fallback: If text extraction stripped the link but left the word, don't fail the user
+    if "linkedin.com" in text.lower() or "linkedin" in text.lower():
+        return "https://linkedin.com"
+        
+    return None
 
 
 def extract_github(text: str) -> Optional[str]:
-    """Extract GitHub URL from text."""
-    pattern = r"github\.com/[\w\-]+"
+    """Extract GitHub URL or mention from text."""
+    if not text:
+        return None
+        
+    # 1. Try to find a structured URL (skips common false positives like github.com/features)
+    pattern = r"(?:https?://)?(?:www\.)?github\.com/[\w\-]+"
     match = re.search(pattern, text, re.IGNORECASE)
-    return f"https://{match.group()}" if match else None
+    if match:
+        url = match.group()
+        # Avoid matching generic paths like github.com/join
+        if not any(keyword in url.lower() for keyword in ['/join', '/features', '/explore', '/pricing']):
+            if not url.lower().startswith('http'):
+                url = f"https://{url}"
+            return url
+            
+    # 2. Fallback: If text extraction stripped the link but left the word
+    if "github.com" in text.lower() or "github" in text.lower():
+        return "https://github.com"
+        
+    return None
 
 
 def extract_name(text: str) -> Optional[str]:
