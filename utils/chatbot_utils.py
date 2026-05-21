@@ -55,7 +55,7 @@ def get_gemini_response(
     try:
         genai.configure(api_key=api_key)
         model = genai.GenerativeModel(
-            model = genai.GenerativeModel('gemini-pro'),
+           model = genai.GenerativeModel(model_name='gemini-1.5-flash'),
             system_instruction=build_system_prompt(resume_context)
         )
 
