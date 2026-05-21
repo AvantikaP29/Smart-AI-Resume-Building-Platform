@@ -43,10 +43,9 @@ def get_gemini_response(
     api_key: str,
     resume_context: Optional[Dict] = None
 ) -> str:
-    """Get response from Google Gemini API using bulletproof direct HTTP requests."""
+    """Get response from Google Gemini API using direct HTTP requests with correct structure."""
     try:
-        # 🔑 Replace with your actual hardcoded key if you want it inbuilt, 
-        # or leave it as api_key to read from the sidebar.
+        # Use the api_key passed from your sidebar settings
         INBUILT_KEY = api_key 
         
         if not INBUILT_KEY:
@@ -67,11 +66,11 @@ def get_gemini_response(
                 "parts": [{"text": msg["content"]}]
             })
 
-        # 🔑 THE STRUCTURAL FIX: 
-        # For the raw REST API, 'system_instruction' must be wrapped as an object containing 'parts'
+        # 🔑 THE STRUCTURAL FIX:
+        # Google's raw HTTP endpoint uses camelCase 'systemInstruction' instead of snake_case.
         payload = {
             "contents": contents,
-            "system_instruction": {
+            "systemInstruction": {
                 "parts": [
                     {"text": build_system_prompt(resume_context)}
                 ]
