@@ -10,6 +10,8 @@ from typing import List, Dict, Optional
 
 try:
     import google.generativeai as genai
+    # 🔥 FORCE GLOBAL RAILS ONTO THE PRODUCTION API (PREVENTS v1beta 404)
+    genai.client._api_version = 'v1'
     GEMINI_AVAILABLE = True
 except ImportError:
     GEMINI_AVAILABLE = False
@@ -53,20 +55,16 @@ def get_gemini_response(
         return get_fallback_response(messages[-1]["content"] if messages else "")
 
     try:
-        # 1. Setup production v1 API version routing
-        import google.generativeai as genai
-        from google.generativeai import client
-        
+        # Re-configure the API key safely
         genai.configure(api_key=api_key)
-        client._api_version = 'v1'
         
-        # 2. Initialize the model
+        # Initialize the model 
         model = genai.GenerativeModel(
             model_name='gemini-1.5-flash',
             system_instruction=build_system_prompt(resume_context)
         )
-        
-        # 3. Build conversation history
+
+        # Build conversation history
         history = []
         for msg in messages[:-1]:
             history.append({
@@ -74,7 +72,6 @@ def get_gemini_response(
                 "parts": [msg["content"]]
             })
 
-        # 4. Generate response
         chat = model.start_chat(history=history)
         response = chat.send_message(messages[-1]["content"])
         return response.text
@@ -84,7 +81,8 @@ def get_gemini_response(
         if "API_KEY" in error_msg.upper() or "invalid" in error_msg.lower():
             return "⚠️ Invalid API key. Please check your Gemini API key in the sidebar settings."
         return f"⚠️ Error connecting to AI: {error_msg}\n\n{get_fallback_response(messages[-1]['content'])}"
-        
+
+
 def get_fallback_response(user_message: str) -> str:
     """Rule-based fallback responses for common career questions."""
     msg = user_message.lower()
@@ -161,7 +159,7 @@ Linux → Networking → Docker → Kubernetes → CI/CD → Terraform
 | Data Scientist | $70K | $95K | $140K |
 | ML Engineer | $90K | $120K | $160K |
 | Web Developer | $55K | $80K | $120K |
-| DevOps Engineer | $75K | $100K $145K |
+| DevOps Engineer | $75K | $100K | $145K |
 | Cloud Engineer | $80K | $110K | $150K |
 
 **Negotiation Tips:**
@@ -201,6 +199,4 @@ I can help you with:
 - 🎤 **Interview Prep** — "Common interview questions for ML Engineer"
 - 💰 **Salary Info** — "What's the salary for a DevOps Engineer?"
 - 💡 **Project Ideas** — "Portfolio project ideas for web development"
-- 🏆 **Certifications** — "Best certifications for Cloud Engineer"
-
-What would you like help with today?"""
+- 🏆 **Certifications** — "Best certifications for Cloud Engineer\""""
