@@ -593,11 +593,12 @@ def render_optimization_tab(ats_report, parsed):
     # ATS checklist
     st.markdown("<h4 style='color:#e8eaf6;'>✅ ATS Readiness Checklist</h4>",
                 unsafe_allow_html=True)
+    # Updated keys to look for "email_address" or fallback to basic keywords
     checks = [
-        ("Email address present",             bool(parsed.get("email"))),
-        ("Phone number present",              bool(parsed.get("phone"))),
-        ("LinkedIn URL included",             bool(parsed.get("linkedin"))),
-        ("GitHub URL included",              bool(parsed.get("github"))),
+        ("Email address present",             bool(parsed.get("email") or parsed.get("email_address") or "@" in str(parsed))),
+        ("Phone number present",              bool(parsed.get("phone") or parsed.get("phone_number"))),
+        ("LinkedIn URL included",             bool(parsed.get("linkedin") or parsed.get("linkedin_url") or "linkedin" in str(parsed).lower())),
+        ("GitHub URL included",              bool(parsed.get("github") or parsed.get("github_url") or "github" in str(parsed).lower())),
         ("10+ skills listed",                len(parsed.get("skills", [])) >= 10),
         ("Education clearly stated",          bool(parsed.get("education"))),
         ("Certifications mentioned",          bool(parsed.get("certifications"))),
