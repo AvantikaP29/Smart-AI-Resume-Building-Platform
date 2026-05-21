@@ -49,13 +49,13 @@ def get_gemini_response(
     resume_context: Optional[Dict] = None
 ) -> str:
     """Get response from Google Gemini API."""
-    if not GEMINI_AVAILABLE:
+   if not GEMINI_AVAILABLE:
         return get_fallback_response(messages[-1]["content"] if messages else "")
 
     try:
         genai.configure(api_key=api_key)
         model = genai.GenerativeModel(
-           model = genai.GenerativeModel(model_name='gemini-1.5-flash'),
+            'gemini-1.5-flash',
             system_instruction=build_system_prompt(resume_context)
         )
 
