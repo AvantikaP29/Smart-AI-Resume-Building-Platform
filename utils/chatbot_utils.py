@@ -52,23 +52,18 @@ def get_gemini_response(
         return get_fallback_response(messages[-1]["content"] if messages else "")
 
     try:
-        # Initialize basic configuration
+        # 1. Configure the API key safely
         genai.configure(api_key=api_key)
         
-        # 🔑 THE CORRECT METHOD: Override the default API version client variable directly
-        import google.generativeai.types as types
-        from google.generativeai import api
-        
-        # This forcefully re-routes the active runtime client manager to 'v1' production rails
-        api.get_client().api_version = "v1"
-
-        # Initialize the model attached to the updated client
+        # 🔑 THE PERMANENT FIX: Passing api_version explicitly via client_options.
+        # This completely tells the backend engine to ignore v1beta without breaking imports.
         model = genai.GenerativeModel(
             model_name='gemini-1.5-flash',
-            system_instruction=build_system_prompt(resume_context)
+            system_instruction=build_system_prompt(resume_context),
+            client_options={'api_version': 'v1'}
         )
 
-        # Build conversation history
+        # 2. Build conversation history
         history = []
         for msg in messages[:-1]:
             history.append({
@@ -76,6 +71,7 @@ def get_gemini_response(
                 "parts": [msg["content"]]
             })
 
+        # 3. Fire the chat instance natively
         chat = model.start_chat(history=history)
         response = chat.send_message(messages[-1]["content"])
         return response.text
