@@ -49,28 +49,24 @@ def get_gemini_response(
     resume_context: Optional[Dict] = None
 ) -> str:
     """Get response from Google Gemini API."""
-def get_gemini_response(messages, api_key, resume_context=None):
     if not GEMINI_AVAILABLE:
         return get_fallback_response(messages[-1]["content"] if messages else "")
 
     try:
-        # 1. Force the client configuration to use the production v1 API version
+        # 1. Setup production v1 API version routing
         import google.generativeai as genai
         from google.generativeai import client
         
         genai.configure(api_key=api_key)
-        # This forcefully overrides the default 'v1beta' string built into the old library
         client._api_version = 'v1'
         
-        # 2. Re-initialize your model normally
+        # 2. Initialize the model
         model = genai.GenerativeModel(
             model_name='gemini-1.5-flash',
             system_instruction=build_system_prompt(resume_context)
         )
         
-        # Your remaining chat/response generation code goes here...
-
-        # Build conversation history
+        # 3. Build conversation history
         history = []
         for msg in messages[:-1]:
             history.append({
@@ -78,6 +74,7 @@ def get_gemini_response(messages, api_key, resume_context=None):
                 "parts": [msg["content"]]
             })
 
+        # 4. Generate response
         chat = model.start_chat(history=history)
         response = chat.send_message(messages[-1]["content"])
         return response.text
@@ -87,8 +84,7 @@ def get_gemini_response(messages, api_key, resume_context=None):
         if "API_KEY" in error_msg.upper() or "invalid" in error_msg.lower():
             return "⚠️ Invalid API key. Please check your Gemini API key in the sidebar settings."
         return f"⚠️ Error connecting to AI: {error_msg}\n\n{get_fallback_response(messages[-1]['content'])}"
-
-
+        
 def get_fallback_response(user_message: str) -> str:
     """Rule-based fallback responses for common career questions."""
     msg = user_message.lower()
