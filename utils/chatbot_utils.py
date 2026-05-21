@@ -49,7 +49,7 @@ def get_gemini_response(
     resume_context: Optional[Dict] = None
 ) -> str:
     """Get response from Google Gemini API."""
- def get_gemini_response(messages, api_key, resume_context=None):
+def get_gemini_response(messages, api_key, resume_context=None):
     if not GEMINI_AVAILABLE:
         return get_fallback_response(messages[-1]["content"] if messages else "")
 
