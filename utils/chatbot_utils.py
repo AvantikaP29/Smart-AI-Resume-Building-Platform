@@ -62,6 +62,8 @@ def get_gemini_response(
                 "parts": [{"text": msg["content"]}]
             })
 
+        # 🔑 THE STRUCTURAL FIX:
+        # systemInstruction requires an outer 'parts' block matching standard conversation objects
         payload = {
             "contents": contents,
             "systemInstruction": {
