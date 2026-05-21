@@ -54,13 +54,17 @@ def get_gemini_response(messages, api_key, resume_context=None):
         return get_fallback_response(messages[-1]["content"] if messages else "")
 
     try:
-        # 1. Force the API to use the proper production v1 version instead of v1beta
-        import google.generativeai.types as types
-        genai.configure(api_key=api_key, transport='rest') 
+        # 1. Force the client configuration to use the production v1 API version
+        import google.generativeai as genai
+        from google.generativeai import client
         
-        # 2. Use the strict model path format to bypass older client mapping bugs
+        genai.configure(api_key=api_key)
+        # This forcefully overrides the default 'v1beta' string built into the old library
+        client._api_version = 'v1'
+        
+        # 2. Re-initialize your model normally
         model = genai.GenerativeModel(
-            model_name='models/gemini-1.5-flash',
+            model_name='gemini-1.5-flash',
             system_instruction=build_system_prompt(resume_context)
         )
         
