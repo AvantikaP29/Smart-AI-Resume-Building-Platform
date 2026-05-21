@@ -46,11 +46,14 @@ def get_gemini_response(
 ) -> str:
     """Get response from Google Gemini API using bulletproof direct HTTP requests."""
     try:
-        if not api_key:
-            return "⚠️ Gemini API key is missing. Please check your sidebar settings."
+        # 🔑 REPLACE YOUR KEY HERE: Hardcode it directly inside the request function
+        INBUILT_KEY = "AIzaSyBSP3taA_z9aOtdk5oPtoyxmPgEpQ9mbJ0" # Paste your actual working Gemini key here
+        
+        if not INBUILT_KEY:
+            return "⚠️ Gemini API key is missing. Please check your script configuration."
 
-        # 🔑 THE ULTIMATE BYPASS: Force the request directly to the production stable v1 endpoint map
-        url = f"https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent?key={api_key}"
+        # Force the URL payload route to use the INBUILT_KEY instead of the variable
+        url = f"https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent?key={INBUILT_KEY}"
         
         headers = {
             "Content-Type": "application/json"
@@ -79,8 +82,6 @@ def get_gemini_response(
         # Handle errors gracefully
         if response.status_code != 200:
             error_msg = response_data.get("error", {}).get("message", "Unknown API Error")
-            if "API_KEY" in error_msg.upper() or "INVALID" in error_msg.upper():
-                return "⚠️ Invalid API key. Please check your Gemini API key in the sidebar settings."
             return f"⚠️ Error connecting to AI: {error_msg}\n\n{get_fallback_response(messages[-1]['content'])}"
 
         # Extract text response from JSON payload safely
@@ -88,7 +89,7 @@ def get_gemini_response(
 
     except Exception as e:
         return f"⚠️ Error connecting to AI: {str(e)}\n\n{get_fallback_response(messages[-1]['content'])}"
-
+       
 
 def get_fallback_response(user_message: str) -> str:
     """Rule-based fallback responses for common career questions."""
