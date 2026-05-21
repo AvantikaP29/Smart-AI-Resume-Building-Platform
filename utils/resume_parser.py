@@ -181,11 +181,13 @@ def tokenize_and_lemmatize(text: str) -> List[str]:
 
 # ─── INFORMATION EXTRACTION ──────────────────────────────────────────────────
 
-def extract_email(text: str) -> Optional[str]:
-    """Extract email address from text."""
-    pattern = r"\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b"
-    match = re.search(pattern, text)
-    return match.group() if match else None
+import re
+
+def extract_email(text):
+    # This catches emails even if PDF extraction adds weird spacing
+    email_pattern = r'[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}'
+    match = re.search(email_pattern, text)
+    return match.group(0) if match else None
 
 
 def extract_phone(text: str) -> Optional[str]:
