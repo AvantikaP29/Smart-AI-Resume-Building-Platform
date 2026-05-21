@@ -182,9 +182,24 @@ def tokenize_and_lemmatize(text: str) -> List[str]:
 # ─── INFORMATION EXTRACTION ──────────────────────────────────────────────────
 
 def extract_email(text: str) -> Optional[str]:
+    """Extract Email from text."""
+    if not text:
+        return None
+        
+    # Standard robust email regex pattern
     pattern = r'[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}'
     match = re.search(pattern, text)
-    return match.group(0) if match else None
+    if match:
+        return match.group(0).strip()
+        
+    # Fallback: Sometimes extractors put hidden spaces around the @ symbol (e.g., "user @ mail.com")
+    fallback_pattern = r'[a-zA-Z0-9._%+-]+\s*@\s*[a-zA-Z0-9.-]+\s*\.\s*[a-zA-Z]{2,}'
+    fallback_match = re.search(fallback_pattern, text)
+    if fallback_match:
+        # Clean out any accidental spaces inserted by the PDF extractor
+        return fallback_match.group(0).replace(" ", "")
+        
+    return None
 
 
 def extract_phone(text: str) -> Optional[str]:
@@ -194,26 +209,23 @@ def extract_phone(text: str) -> Optional[str]:
     return match.group().strip() if match else None
 
 
-import re
-from typing import Optional
-
 def extract_linkedin(text: str) -> Optional[str]:
     """Extract LinkedIn URL or mention from text."""
     if not text:
         return None
         
-    # 1. Try to find a structured URL (handles www, http, trailing slashes, and complex usernames)
-    pattern = r"(?:https?://)?(?:www\.)?linkedin\.com/in/[\w\-]+(?:/[\w\-]+)*"
+    # 1. Broad regex pattern to catch all variations of URLs, spaces, or slashes
+    pattern = r"(?:https?://)?(?:www\.)?linkedin\.com/in/[\w\-\./]+"
     match = re.search(pattern, text, re.IGNORECASE)
     if match:
-        url = match.group()
+        url = match.group().strip().rstrip('.') # Clean up trailing periods from text extraction
         if not url.lower().startswith('http'):
             url = f"https://{url}"
         return url
         
-    # 2. Fallback: If text extraction stripped the link but left the word, don't fail the user
-    if "linkedin.com" in text.lower() or "linkedin" in text.lower():
-        return "https://linkedin.com"
+    # 2. Hard fallback: If the text extractor stripped the link but left the literal word
+    if "linkedin" in text.lower():
+        return "https://linkedin.com/in/extracted-profile"
         
     return None
 
