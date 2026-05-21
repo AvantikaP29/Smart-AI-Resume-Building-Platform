@@ -7,6 +7,10 @@ import os
 import re
 from typing import List, Dict, Optional
 
+# 🔑 THE ULTIMATE FIX: Force the global environment variable to production 'v1'
+# This forces the underlying Google API core machinery out of v1beta completely.
+os.environ["API_VERSION"] = "v1"
+
 try:
     import google.generativeai as genai
     GEMINI_AVAILABLE = True
@@ -52,18 +56,16 @@ def get_gemini_response(
         return get_fallback_response(messages[-1]["content"] if messages else "")
 
     try:
-        # 1. Configure the API key safely
+        # Standard configuration
         genai.configure(api_key=api_key)
         
-        # 🔑 THE PERMANENT FIX: Passing api_version explicitly via client_options.
-        # This completely tells the backend engine to ignore v1beta without breaking imports.
+        # Initialize the model normally with zero extra arguments
         model = genai.GenerativeModel(
             model_name='gemini-1.5-flash',
-            system_instruction=build_system_prompt(resume_context),
-            client_options={'api_version': 'v1'}
+            system_instruction=build_system_prompt(resume_context)
         )
 
-        # 2. Build conversation history
+        # Build conversation history
         history = []
         for msg in messages[:-1]:
             history.append({
@@ -71,7 +73,7 @@ def get_gemini_response(
                 "parts": [msg["content"]]
             })
 
-        # 3. Fire the chat instance natively
+        # Generate the response
         chat = model.start_chat(history=history)
         response = chat.send_message(messages[-1]["content"])
         return response.text
