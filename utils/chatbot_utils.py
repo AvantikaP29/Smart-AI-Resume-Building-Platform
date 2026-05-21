@@ -49,16 +49,20 @@ def get_gemini_response(
     resume_context: Optional[Dict] = None
 ) -> str:
     """Get response from Google Gemini API."""
- if not GEMINI_AVAILABLE:
+ def get_gemini_response(messages, api_key, resume_context=None):
+    if not GEMINI_AVAILABLE:
         return get_fallback_response(messages[-1]["content"] if messages else "")
 
     try:
         genai.configure(api_key=api_key)
-        # Ensure 'model = ...' and 'system_instruction=...' align perfectly!
+        
+        # Cleanly initialized without nesting or unexpected keyword arguments
         model = genai.GenerativeModel(
             'gemini-1.5-flash',
             system_instruction=build_system_prompt(resume_context)
         )
+        
+        # Your remaining chat/response generation code goes here...
 
         # Build conversation history
         history = []
