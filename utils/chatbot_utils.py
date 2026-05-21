@@ -5,15 +5,11 @@ Falls back to rule-based responses if API key not available.
 """
 import os
 import re
+import requests
 from typing import List, Dict, Optional
 
-try:
-    # We switch to the standard, official client routing initialization
-    import google.generativeai as genai
-    GEMINI_AVAILABLE = True
-except ImportError:
-    GEMINI_AVAILABLE = False
-
+# We hardcode the flag to True since we will use direct HTTP requests as a perfect native solution
+GEMINI_AVAILABLE = True
 
 def build_system_prompt(resume_context: Optional[Dict] = None) -> str:
     """Build chatbot system prompt with optional resume context."""
@@ -48,41 +44,50 @@ def get_gemini_response(
     api_key: str,
     resume_context: Optional[Dict] = None
 ) -> str:
-    """Get response from Google Gemini API."""
-    if not GEMINI_AVAILABLE:
-        return get_fallback_response(messages[-1]["content"] if messages else "")
-
+    """Get response from Google Gemini API using bulletproof direct HTTP requests."""
     try:
-        # 🔑 THE ULTIMATE BYPASS: Force the base API environment route globally
-        # This completely rewrites the destination server url to target the standard 'v1' production api pipeline
-        os.environ["api_version"] = "v1"
-        genai.configure(api_key=api_key)
-        
-        # We explicitly drop model_name defaults and state initialization options
-        # by initializing a completely fresh, decoupled model container instance
-        model = genai.GenerativeModel(
-            'gemini-1.5-flash',
-            system_instruction=build_system_prompt(resume_context)
-        )
+        if not api_key:
+            return "⚠️ Gemini API key is missing. Please check your sidebar settings."
 
-        # Build conversation history structures cleanly
-        history = []
-        for msg in messages[:-1]:
-            history.append({
+        # 🔑 THE ULTIMATE BYPASS: Force the request directly to the production stable v1 endpoint map
+        url = f"https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent?key={api_key}"
+        
+        headers = {
+            "Content-Type": "application/json"
+        }
+
+        # Convert conversation history to Google's structural format
+        contents = []
+        for msg in messages:
+            contents.append({
                 "role": "user" if msg["role"] == "user" else "model",
-                "parts": [msg["content"]]
+                "parts": [{"text": msg["content"]}]
             })
 
-        # Generate message response using standard streaming pathways
-        chat = model.start_chat(history=history)
-        response = chat.send_message(messages[-1]["content"])
-        return response.text
+        # Build payload with strict system instructions
+        payload = {
+            "contents": contents,
+            "systemInstruction": {
+                "parts": [{"text": build_system_prompt(resume_context)}]
+            }
+        }
+
+        # Fire the HTTP request directly to Google's production rails
+        response = requests.post(url, headers=headers, json=payload)
+        response_data = response.json()
+
+        # Handle errors gracefully
+        if response.status_code != 200:
+            error_msg = response_data.get("error", {}).get("message", "Unknown API Error")
+            if "API_KEY" in error_msg.upper() or "INVALID" in error_msg.upper():
+                return "⚠️ Invalid API key. Please check your Gemini API key in the sidebar settings."
+            return f"⚠️ Error connecting to AI: {error_msg}\n\n{get_fallback_response(messages[-1]['content'])}"
+
+        # Extract text response from JSON payload safely
+        return response_data["candidates"][0]["content"]["parts"][0]["text"]
 
     except Exception as e:
-        error_msg = str(e)
-        if "API_KEY" in error_msg.upper() or "invalid" in error_msg.lower():
-            return "⚠️ Invalid API key. Please check your Gemini API key in the sidebar settings."
-        return f"⚠️ Error connecting to AI: {error_msg}\n\n{get_fallback_response(messages[-1]['content'])}"
+        return f"⚠️ Error connecting to AI: {str(e)}\n\n{get_fallback_response(messages[-1]['content'])}"
 
 
 def get_fallback_response(user_message: str) -> str:
