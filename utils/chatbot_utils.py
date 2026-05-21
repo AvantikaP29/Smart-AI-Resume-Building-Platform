@@ -8,7 +8,6 @@ import re
 import requests
 from typing import List, Dict, Optional
 
-# We hardcode the flag to True since we will use direct HTTP requests as a perfect native solution
 GEMINI_AVAILABLE = True
 
 def build_system_prompt(resume_context: Optional[Dict] = None) -> str:
@@ -46,20 +45,21 @@ def get_gemini_response(
 ) -> str:
     """Get response from Google Gemini API using bulletproof direct HTTP requests."""
     try:
-        # 🔑 REPLACE YOUR KEY HERE: Hardcode it directly inside the request function
-        INBUILT_KEY = "AIzaSyBSP3taA_z9aOtdk5oPtoyxmPgEpQ9mbJ0" # Paste your actual working Gemini key here
+        # 🔑 Replace with your actual hardcoded key if you want it inbuilt, 
+        # or leave it as api_key to read from the sidebar.
+        INBUILT_KEY = api_key 
         
         if not INBUILT_KEY:
-            return "⚠️ Gemini API key is missing. Please check your script configuration."
+            return "⚠️ Gemini API key is missing. Please check your sidebar settings."
 
-        # Force the URL payload route to use the INBUILT_KEY instead of the variable
+        # Target the stable production v1 endpoint map
         url = f"https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent?key={INBUILT_KEY}"
         
         headers = {
             "Content-Type": "application/json"
         }
 
-        # Convert conversation history to Google's structural format
+        # Convert conversation history to Google's strict structural format
         contents = []
         for msg in messages:
             contents.append({
@@ -67,11 +67,14 @@ def get_gemini_response(
                 "parts": [{"text": msg["content"]}]
             })
 
-        # Build payload with strict system instructions
+        # 🔑 THE STRUCTURAL FIX: 
+        # For the raw REST API, 'system_instruction' must be wrapped as an object containing 'parts'
         payload = {
             "contents": contents,
-            "systemInstruction": {
-                "parts": [{"text": build_system_prompt(resume_context)}]
+            "system_instruction": {
+                "parts": [
+                    {"text": build_system_prompt(resume_context)}
+                ]
             }
         }
 
@@ -89,7 +92,7 @@ def get_gemini_response(
 
     except Exception as e:
         return f"⚠️ Error connecting to AI: {str(e)}\n\n{get_fallback_response(messages[-1]['content'])}"
-       
+
 
 def get_fallback_response(user_message: str) -> str:
     """Rule-based fallback responses for common career questions."""
