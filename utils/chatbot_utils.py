@@ -54,10 +54,13 @@ def get_gemini_response(messages, api_key, resume_context=None):
         return get_fallback_response(messages[-1]["content"] if messages else "")
 
     try:
-        genai.configure(api_key=api_key)
-        # Using model_name guarantees it maps perfectly across older/newer library versions
+        # 1. Force the API to use the proper production v1 version instead of v1beta
+        import google.generativeai.types as types
+        genai.configure(api_key=api_key, transport='rest') 
+        
+        # 2. Use the strict model path format to bypass older client mapping bugs
         model = genai.GenerativeModel(
-            model_name='gemini-1.5-flash',
+            model_name='models/gemini-1.5-flash',
             system_instruction=build_system_prompt(resume_context)
         )
         
