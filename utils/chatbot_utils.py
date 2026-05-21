@@ -68,14 +68,14 @@ def get_gemini_response(
 
         # 🔑 THE STRUCTURAL FIX:
         # Google's raw HTTP endpoint uses camelCase 'systemInstruction' instead of snake_case.
-        payload = {
-            "contents": contents,
-            "systemInstruction": {
-                "parts": [
-                    {"text": build_system_prompt(resume_context)}
-                ]
-            }
-        }
+       payload = {
+    "contents": contents,
+    "systemInstruction": {
+        "parts": [
+            {"text": build_system_prompt(resume_context)}
+        ]
+    }
+}
 
         # Fire the HTTP request directly to Google's production rails
         response = requests.post(url, headers=headers, json=payload)
