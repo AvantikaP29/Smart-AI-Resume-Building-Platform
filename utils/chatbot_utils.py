@@ -58,7 +58,7 @@ def get_gemini_response(messages, api_key, resume_context=None):
         
         # Cleanly initialized without nesting or unexpected keyword arguments
         model = genai.GenerativeModel(
-            'gemini-1.5-flash',
+            'gemini-pro',
             system_instruction=build_system_prompt(resume_context)
         )
         
