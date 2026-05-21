@@ -17,7 +17,7 @@ except ImportError:
 
 def build_system_prompt(resume_context: Optional[Dict] = None) -> str:
     """Build chatbot system prompt with optional resume context."""
-    base = """You are ResumeAI Assistant — an expert career counselor and resume coach.
+    base = """You are HireSenseAI Assistant — an expert career counselor and resume coach.
 You help candidates with:
 - Resume improvement and ATS optimization
 - Career roadmaps and learning paths
@@ -55,7 +55,7 @@ def get_gemini_response(
     try:
         genai.configure(api_key=api_key)
         model = genai.GenerativeModel(
-            model_name="gemini-1.5-flash",
+            model = genai.GenerativeModel('gemini-pro'),
             system_instruction=build_system_prompt(resume_context)
         )
 
@@ -186,7 +186,7 @@ Linux → Networking → Docker → Kubernetes → CI/CD → Terraform
 **Tips:** Deploy everything! Use GitHub Pages, Vercel, Render, or AWS Free Tier."""
 
     else:
-        return """Hello! I'm **ResumeAI Assistant** 👋
+        return """Hello! I'm **HireSenseAI Assistant** 👋
 
 I can help you with:
 - 📄 **Resume Review** — "How can I improve my resume?"
