@@ -52,15 +52,17 @@ def get_gemini_response(
         return get_fallback_response(messages[-1]["content"] if messages else "")
 
     try:
-        # Initialize configuration
+        # Initialize basic configuration
         genai.configure(api_key=api_key)
         
-        # Overriding the API client version explicitly to bypass the v1beta 404 issue permanently
-        from google.generativeai import client
-        api_client = client.get_default_api_client()
-        api_client.api_version = "v1"
+        # 🔑 THE CORRECT METHOD: Override the default API version client variable directly
+        import google.generativeai.types as types
+        from google.generativeai import api
         
-        # Initialize the model attached to the forced v1 client
+        # This forcefully re-routes the active runtime client manager to 'v1' production rails
+        api.get_client().api_version = "v1"
+
+        # Initialize the model attached to the updated client
         model = genai.GenerativeModel(
             model_name='gemini-1.5-flash',
             system_instruction=build_system_prompt(resume_context)
