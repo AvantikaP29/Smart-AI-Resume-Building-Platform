@@ -2,7 +2,6 @@
 AI Chatbot Utility
 Career guidance chatbot using Google Gemini API.
 Falls back to rule-based responses if API key not available.
-"""
 import os
 import re
 import requests
@@ -43,22 +42,19 @@ def get_gemini_response(
     api_key: str,
     resume_context: Optional[Dict] = None
 ) -> str:
-    """Get response from Google Gemini API using direct HTTP requests with correct structure."""
+    """Get response from Google Gemini API using direct REST execution."""
     try:
-        # Use the api_key passed from your sidebar settings
         INBUILT_KEY = api_key 
         
         if not INBUILT_KEY:
             return "⚠️ Gemini API key is missing. Please check your sidebar settings."
 
-        # Target the stable production v1 endpoint map
         url = f"https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent?key={INBUILT_KEY}"
         
         headers = {
             "Content-Type": "application/json"
         }
 
-        # Convert conversation history to Google's strict structural format
         contents = []
         for msg in messages:
             contents.append({
@@ -66,27 +62,22 @@ def get_gemini_response(
                 "parts": [{"text": msg["content"]}]
             })
 
-        # 🔑 THE STRUCTURAL FIX:
-        # Google's raw HTTP endpoint uses camelCase 'systemInstruction' instead of snake_case.
-       payload = {
-    "contents": contents,
-    "systemInstruction": {
-        "parts": [
-            {"text": build_system_prompt(resume_context)}
-        ]
-    }
-}
+        payload = {
+            "contents": contents,
+            "systemInstruction": {
+                "parts": [
+                    {"text": build_system_prompt(resume_context)}
+                ]
+            }
+        }
 
-        # Fire the HTTP request directly to Google's production rails
         response = requests.post(url, headers=headers, json=payload)
         response_data = response.json()
 
-        # Handle errors gracefully
         if response.status_code != 200:
             error_msg = response_data.get("error", {}).get("message", "Unknown API Error")
             return f"⚠️ Error connecting to AI: {error_msg}\n\n{get_fallback_response(messages[-1]['content'])}"
 
-        # Extract text response from JSON payload safely
         return response_data["candidates"][0]["content"]["parts"][0]["text"]
 
     except Exception as e:
