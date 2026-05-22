@@ -1,4 +1,4 @@
-import os
+ import os
 import requests
 import streamlit as st
 from typing import Dict, Optional
@@ -18,19 +18,18 @@ You help candidates with:
     return base
 
 def get_gemini_response(prompt: str, *args, **kwargs) -> str:
-    """Sends the user prompt to the Gemini API securely."""
+    """Sends the user prompt to the Gemini API using secure background secrets directly."""
     try:
-        # Retrieve the key from Streamlit secrets
-        raw_key = st.secrets.get("GEMINI_API_KEY", None)
-        if not raw_key:
-            return "⚠️ Gemini API key is missing in Streamlit Secrets."
+        # FORCE load directly from Streamlit secrets to prevent broken session variables from breaking it
+        target_key = st.secrets.get("GEMINI_API_KEY", None)
+            
+        if not target_key:
+            return "⚠️ Connection Error: The secret 'GEMINI_API_KEY' was not found in your Streamlit Advanced Settings -> Secrets panel."
 
-        # Clean the string completely BEFORE inserting it into the URL
-        target_key = str(raw_key).strip()
+        # Clean any accidental spaces or linebreaks
+        target_key = str(target_key).strip()
 
-        # FIXED URL: Removed the accidental trailing string injection
         url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key={target_key}"
-        
         headers = {"Content-Type": "application/json"}
         system_context = build_system_prompt()
         
@@ -42,13 +41,16 @@ def get_gemini_response(prompt: str, *args, **kwargs) -> str:
         }
 
         response = requests.post(url, headers=headers, json=data, timeout=15)
+        
         if response.status_code == 200:
             return response.json()['candidates'][0]['content']['parts'][0]['text']
         else:
-            return f"❌ API Error ({response.status_code}): {response.text}"
+            # THIS WILL PRINT THE EXACT REASON INSTEAD OF THE GENERIC FALLBACK
+            return f"❌ Google API Rejection ({response.status_code}): {response.text}"
             
     except Exception as e:
-        return f"❌ Connectivity Error: {str(e)}"
+        return f"❌ System Error: {str(e)}"
 
 def get_fallback_response(prompt: str, *args, **kwargs) -> str:
-    return "⚠️ The chatbot is currently experiencing technical difficulties connectivity-side."
+    # Point directly to the diagnostic function response above
+    return get_gemini_response(prompt)
