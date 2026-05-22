@@ -1,6 +1,7 @@
 import os
 import re
 import requests
+import streamlit as st
 from typing import List, Dict, Optional
 
 GEMINI_AVAILABLE = True
@@ -18,14 +19,24 @@ You help candidates with:
     return base
 
 
-def get_gemini_response(prompt: str, api_key: str) -> str:
-    """Sends the user prompt to the Gemini API using the standard v1beta API endpoint."""
+def get_gemini_response(prompt: str, api_key: str = None) -> str:
+    """Sends the user prompt to the Gemini API using the secure backend secrets directly."""
     try:
-        if not api_key:
-            return "⚠️ Gemini API key is missing. Please check your system settings."
+        # STRATEGY: Try loading directly from Streamlit secrets first to prevent passing bugs
+        target_key = None
+        if "GEMINI_API_KEY" in st.secrets:
+            target_key = st.secrets["GEMINI_API_KEY"]
+        elif api_key:
+            target_key = api_key
+            
+        if not target_key:
+            return "⚠️ Gemini API key is missing. Please verify GEMINI_API_KEY is configured in your Streamlit Secrets."
 
-        # Using v1beta for reliable text generation formatting
-        url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key={api_key}"
+        # Clean any accidental whitespaces or line breaks from the key string
+        target_key = str(target_key).strip()
+
+        # Production API endpoint
+        url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key={target_key}"
         
         headers = {
             "Content-Type": "application/json"
@@ -33,7 +44,6 @@ def get_gemini_response(prompt: str, api_key: str) -> str:
 
         system_context = build_system_prompt()
         
-        # Standard structural payload expected by Google's API
         data = {
             "contents": [
                 {
@@ -45,24 +55,21 @@ def get_gemini_response(prompt: str, api_key: str) -> str:
             ]
         }
 
-        response = requests.post(url, headers=headers, json=data, timeout=10)
+        response = requests.post(url, headers=headers, json=data, timeout=12)
         
         if response.status_code == 200:
             result = response.json()
             try:
-                # Target the exact nested response pathway returned by Google
                 return result['candidates'][0]['content']['parts'][0]['text']
             except (KeyError, IndexError):
-                return "⚠️ API responded successfully, but the message formatting was unexpected."
+                return "⚠️ API responded successfully, but the message formatting structure was unexpected."
         else:
-            # Fall back to technical details if the key itself is rejected by Google
             return f"❌ API Error ({response.status_code}): {response.text}"
 
     except Exception as e:
-        # If network times out or fails, trigger standard fallback message
-        return get_fallback_response(prompt)
+        return f"❌ System Connectivity Error: {str(e)}"
 
 
 def get_fallback_response(prompt: str) -> str:
-    """Fallback handler if the main Gemini response fails entirely."""
-    return "⚠️ The chatbot is currently experiencing technical difficulties connectivity-side. Please double-check your Streamlit Secrets API key values."
+    """Fallback handler."""
+    return "⚠️ The chatbot is currently experiencing technical difficulties connectivity-side."
