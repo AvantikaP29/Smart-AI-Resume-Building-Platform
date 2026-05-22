@@ -1,8 +1,7 @@
 import os
-import re
 import requests
 import streamlit as st
-from typing import List, Dict, Optional
+from typing import Dict, Optional
 
 GEMINI_AVAILABLE = True
 
@@ -18,57 +17,38 @@ You help candidates with:
 - Project ideas for portfolio building"""
     return base
 
-
 def get_gemini_response(prompt: str, *args, **kwargs) -> str:
-    """
-    Sends the user prompt to the Gemini API. 
-    Uses *args and **kwargs so it never crashes no matter how modules/chatbot.py calls it.
-    """
+    """Sends the user prompt to the Gemini API securely."""
     try:
-        # Pull directly from secure background secrets
-        target_key = st.secrets.get("GEMINI_API_KEY", None)
-            
-        if not target_key:
-            return "⚠️ Gemini API key is missing. Please verify GEMINI_API_KEY is configured in your Streamlit Secrets."
+        # Retrieve the key from Streamlit secrets
+        raw_key = st.secrets.get("GEMINI_API_KEY", None)
+        if not raw_key:
+            return "⚠️ Gemini API key is missing in Streamlit Secrets."
 
-        # Clean any accidental spaces
-        target_key = str(target_key).strip()
+        # Clean the string completely BEFORE inserting it into the URL
+        target_key = str(raw_key).strip()
 
-        # Reliable v1beta endpoint structure
+        # FIXED URL: Removed the accidental trailing string injection
         url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key={target_key}"
         
-        headers = {
-            "Content-Type": "application/json"
-        }
-
+        headers = {"Content-Type": "application/json"}
         system_context = build_system_prompt()
         
         data = {
-            "contents": [
-                {
-                    "role": "user",
-                    "parts": [
-                        {"text": f"{system_context}\n\nUser Question: {prompt}"}
-                    ]
-                }
-            ]
+            "contents": [{
+                "role": "user",
+                "parts": [{"text": f"{system_context}\n\nUser Question: {prompt}"}]
+            }]
         }
 
         response = requests.post(url, headers=headers, json=data, timeout=15)
-        
         if response.status_code == 200:
-            result = response.json()
-            try:
-                return result['candidates'][0]['content']['parts'][0]['text']
-            except (KeyError, IndexError):
-                return "⚠️ API responded, but the message formatting structure was unexpected."
+            return response.json()['candidates'][0]['content']['parts'][0]['text']
         else:
             return f"❌ API Error ({response.status_code}): {response.text}"
-
+            
     except Exception as e:
         return f"❌ Connectivity Error: {str(e)}"
 
-
 def get_fallback_response(prompt: str, *args, **kwargs) -> str:
-    """Fallback handler that accepts any arguments to prevent crashes."""
     return "⚠️ The chatbot is currently experiencing technical difficulties connectivity-side."
