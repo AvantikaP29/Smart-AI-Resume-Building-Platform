@@ -19,23 +19,22 @@ You help candidates with:
     return base
 
 
-def get_gemini_response(prompt: str, api_key: str = None) -> str:
-    """Sends the user prompt to the Gemini API using the secure backend secrets directly."""
+def get_gemini_response(prompt: str, *args, **kwargs) -> str:
+    """
+    Sends the user prompt to the Gemini API. 
+    Uses *args and **kwargs so it never crashes no matter how modules/chatbot.py calls it.
+    """
     try:
-        # STRATEGY: Try loading directly from Streamlit secrets first to prevent passing bugs
-        target_key = None
-        if "GEMINI_API_KEY" in st.secrets:
-            target_key = st.secrets["GEMINI_API_KEY"]
-        elif api_key:
-            target_key = api_key
+        # Pull directly from secure background secrets
+        target_key = st.secrets.get("GEMINI_API_KEY", None)
             
         if not target_key:
             return "⚠️ Gemini API key is missing. Please verify GEMINI_API_KEY is configured in your Streamlit Secrets."
 
-        # Clean any accidental whitespaces or line breaks from the key string
+        # Clean any accidental spaces
         target_key = str(target_key).strip()
 
-        # Production API endpoint
+        # Reliable v1beta endpoint structure
         url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key={target_key}"
         
         headers = {
@@ -55,21 +54,21 @@ def get_gemini_response(prompt: str, api_key: str = None) -> str:
             ]
         }
 
-        response = requests.post(url, headers=headers, json=data, timeout=12)
+        response = requests.post(url, headers=headers, json=data, timeout=15)
         
         if response.status_code == 200:
             result = response.json()
             try:
                 return result['candidates'][0]['content']['parts'][0]['text']
             except (KeyError, IndexError):
-                return "⚠️ API responded successfully, but the message formatting structure was unexpected."
+                return "⚠️ API responded, but the message formatting structure was unexpected."
         else:
             return f"❌ API Error ({response.status_code}): {response.text}"
 
     except Exception as e:
-        return f"❌ System Connectivity Error: {str(e)}"
+        return f"❌ Connectivity Error: {str(e)}"
 
 
-def get_fallback_response(prompt: str) -> str:
-    """Fallback handler."""
+def get_fallback_response(prompt: str, *args, **kwargs) -> str:
+    """Fallback handler that accepts any arguments to prevent crashes."""
     return "⚠️ The chatbot is currently experiencing technical difficulties connectivity-side."
