@@ -363,26 +363,26 @@ def render_sidebar():
 
         st.markdown("<hr style='border-color:rgba(108,99,255,0.2); margin:12px 0;'>", unsafe_allow_html=True)
 
-        # 1. Fetch the key from the background Streamlit secrets securely
+       # 1. Fetch the key from the background Streamlit secrets securely
 if "GEMINI_API_KEY" in st.secrets:
     api_key = st.secrets["GEMINI_API_KEY"]
 else:
     api_key = None
 
-# 2. Updated UI code (Informs the user without exposing the key)
-with st.expander("⚙️ AI Settings"):
-    if api_key:
-        st.success("🔒 System API Key is securely loaded and active.")
-    else:
-        # Fallback text input ONLY if the secrets key isn't configured
-        api_key_input = st.text_input(
-            "Enter Personal Gemini API Key",
-            type="password",
-            placeholder="AIza...",
-            help="Get a free key at https://makersuite.google.com/app/apikey"
-        )
-        if api_key_input:
-            api_key = api_key_input
+# 2. Move the settings to the SIDEBAR to clean up the front login page
+with st.sidebar:
+    with st.expander("⚙️ AI Settings"):
+        if api_key:
+            st.success("🔒 System API Key is securely loaded and active.")
+        else:
+            api_key_input = st.text_input(
+                "Enter Personal Gemini API Key",
+                type="password",
+                placeholder="AIza...",
+                help="Get a free key at https://makersuite.google.com/app/apikey"
+            )
+            if api_key_input:
+                api_key = api_key_input
             
         # Logout
         st.markdown("<div style='height:20px;'></div>", unsafe_allow_html=True)
