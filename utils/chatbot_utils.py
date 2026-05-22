@@ -18,17 +18,14 @@ You help candidates with:
     return base
 
 def get_gemini_response(prompt: str, *args, **kwargs) -> str:
-    """Sends the user prompt to the Gemini API securely."""
+    """Sends the user prompt to the Gemini API securely using background secrets."""
     try:
-        # Retrieve key directly from background secrets
+        # Pull directly from background settings to avoid any passed variable mismatches
         raw_key = st.secrets.get("GEMINI_API_KEY", None)
         if not raw_key:
-            return "⚠️ Gemini API key is missing in Streamlit Secrets."
+            return "⚠️ Gemini API key is missing in your Streamlit Advanced Settings Secrets panel."
 
-        # Clean string safely
         target_key = str(raw_key).strip()
-
-        # Build clean request URL
         url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key={target_key}"
         
         headers = {"Content-Type": "application/json"}
@@ -45,10 +42,10 @@ def get_gemini_response(prompt: str, *args, **kwargs) -> str:
         if response.status_code == 200:
             return response.json()['candidates'][0]['content']['parts'][0]['text']
         else:
-            return f"❌ API Error ({response.status_code}): {response.text}"
+            return f"❌ API Connection Error ({response.status_code}): {response.text}"
             
     except Exception as e:
-        return f"❌ Connectivity Error: {str(e)}"
+        return f"❌ Connectivity Exception: {str(e)}"
 
 def get_fallback_response(prompt: str, *args, **kwargs) -> str:
     return "⚠️ The chatbot is currently experiencing technical difficulties connectivity-side."
