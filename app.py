@@ -363,26 +363,27 @@ def render_sidebar():
 
         st.markdown("<hr style='border-color:rgba(108,99,255,0.2); margin:12px 0;'>", unsafe_allow_html=True)
 
-        # 1. Set your permanent key here
-        INBUILT_KEY = "AIzaSyBSP3taA_z9aOtdk5oPtoyxmPgEpQ9mbJ0"
+        # 1. Fetch the key from the background Streamlit secrets securely
+if "GEMINI_API_KEY" in st.secrets:
+    api_key = st.secrets["GEMINI_API_KEY"]
+else:
+    api_key = None
 
-        # 2. Ensure session state starts with this key if nothing else is set
-        if "gemini_api_key" not in st.session_state or not st.session_state.gemini_api_key:
-            st.session_state.gemini_api_key = INBUILT_KEY
-
-        # 3. Updated UI code
-        with st.expander("⚙️ AI Settings"):
-            api_key = st.text_input(
-                "Gemini API Key",
-                value=st.session_state.gemini_api_key,  # This will now default to your key
-                type="password",
-                placeholder="AIza...",
-                help="Get a free key at https://makersuite.google.com/app/apikey"
-            )
-            if api_key != st.session_state.gemini_api_key:
-                st.session_state.gemini_api_key = api_key
-                st.success("API key updated for this session!")
-
+# 2. Updated UI code (Informs the user without exposing the key)
+with st.expander("⚙️ AI Settings"):
+    if api_key:
+        st.success("🔒 System API Key is securely loaded and active.")
+    else:
+        # Fallback text input ONLY if the secrets key isn't configured
+        api_key_input = st.text_input(
+            "Enter Personal Gemini API Key",
+            type="password",
+            placeholder="AIza...",
+            help="Get a free key at https://makersuite.google.com/app/apikey"
+        )
+        if api_key_input:
+            api_key = api_key_input
+            
         # Logout
         st.markdown("<div style='height:20px;'></div>", unsafe_allow_html=True)
         if st.button("🚪  Logout", use_container_width=True):
