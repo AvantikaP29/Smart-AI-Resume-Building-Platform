@@ -8,6 +8,7 @@ import requests
 from typing import List, Dict, Optional
 
 GEMINI_AVAILABLE = True
+from typing import Optional, Dict
 
 def build_system_prompt(resume_context: Optional[Dict] = None) -> str:
     """Build chatbot system prompt with optional resume context."""
