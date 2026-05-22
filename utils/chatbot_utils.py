@@ -11,8 +11,12 @@ GEMINI_AVAILABLE = True
 
 def build_system_prompt(resume_context: Optional[Dict] = None) -> str:
     """Build chatbot system prompt with optional resume context."""
-  
-base = """You are HireSenseAI Assistant - an expert career counselor and resume coach"""
+    
+    # INDENT THIS LINE! It must line up perfectly with the docstring above.
+    base = """You are HireSenseAI Assistant - an expert career counselor and resume coach"""
+    
+    # Continue your function logic here...
+    return base
 You help candidates with:
 - Resume improvement and ATS optimization
 - Career roadmaps and learning paths
