@@ -15,7 +15,7 @@ from typing import Optional, Dict
 def build_system_prompt(resume_context: Optional[Dict] = None) -> str:
     """Build chatbot system prompt with optional resume context."""
     
-    # 1. Everything below must be inside the triple quotes and perfectly indented!
+    # Everything must be wrapped entirely inside the triple quotes and properly indented
     base = """You are HireSenseAI Assistant - an expert career counselor and resume coach.
 You help candidates with:
 - Resume improvement and ATS optimization
@@ -25,7 +25,6 @@ You help candidates with:
 - Job search strategies
 - Project ideas for portfolio building"""
     
-    # 2. Return the completed string variable
     return base
 
 Be concise, actionable, and encouraging. Format responses with bullet points where helpful.
