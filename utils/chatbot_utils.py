@@ -8,23 +8,25 @@ import requests
 from typing import List, Dict, Optional
 
 GEMINI_AVAILABLE = True
+# utils/chatbot_utils.py
+
 from typing import Optional, Dict
 
 def build_system_prompt(resume_context: Optional[Dict] = None) -> str:
     """Build chatbot system prompt with optional resume context."""
     
-    # INDENT THIS LINE! It must line up perfectly with the docstring above.
-    base = """You are HireSenseAI Assistant - an expert career counselor and resume coach"""
-    
-    # Continue your function logic here...
-    return base
+    # 1. Everything below must be inside the triple quotes and perfectly indented!
+    base = """You are HireSenseAI Assistant - an expert career counselor and resume coach.
 You help candidates with:
 - Resume improvement and ATS optimization
 - Career roadmaps and learning paths
 - Interview preparation and tips
 - Skill gap analysis and recommendations
 - Job search strategies
-- Project ideas for portfolio building
+- Project ideas for portfolio building"""
+    
+    # 2. Return the completed string variable
+    return base
 
 Be concise, actionable, and encouraging. Format responses with bullet points where helpful.
 """
