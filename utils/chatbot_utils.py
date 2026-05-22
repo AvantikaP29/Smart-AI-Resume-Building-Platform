@@ -43,45 +43,32 @@ def get_gemini_response(prompt, api_key):
         INBUILT_KEY = api_key 
         
         if not INBUILT_KEY:
-            return "⚠️ Gemini API key is missing. Please check your system settings."
+            return "⚠️ Gemini API key is missing. Please check your sidebar settings."
 
         url = f"https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent?key={INBUILT_KEY}"
         
         headers = {
             "Content-Type": "application/json"
+        }  # <--- Make sure this curly brace closes the dictionary properly!
+
+        # Construct your payload
+        data = {
+            "contents": [{
+                "parts": [{"text": f"{base}\n\nUser: {prompt}"}]
+            }]
         }
 
-        contents = []
-        for msg in messages:
-            contents.append({
-                "role": "user" if msg["role"] == "user" else "model",
-                "parts": [{"text": msg["content"]}]
-            })
-
-        # 🔑 THE STRUCTURAL FIX:
-        # systemInstruction requires an outer 'parts' block matching standard conversation objects
-        payload = {
-            "contents": contents,
-            "systemInstruction": {
-                "parts": [
-                    {"text": build_system_prompt(resume_context)}
-                ]
-            }
-        }
-
-        response = requests.post(url, headers=headers, json=payload)
-        response_data = response.json()
-
-        if response.status_code != 200:
-            error_msg = response_data.get("error", {}).get("message", "Unknown API Error")
-            return f"⚠️ Error connecting to AI: {error_msg}\n\n{get_fallback_response(messages[-1]['content'])}"
-
-        return response_data["candidates"][0]["content"]["parts"][0]["text"]
+        response = requests.post(url, headers=headers, json=data)
+        
+        if response.status_code == 200:
+            result = response.json()
+            return result['candidates'][0]['content']['parts'][0]['text']
+        else:
+            return f"❌ API Error ({response.status_code}): {response.text}"
 
     except Exception as e:
-        return f"⚠️ Error connecting to AI: {str(e)}\n\n{get_fallback_response(messages[-1]['content'])}"
-
-
+        return f"❌ Error: {str(e)}"
+        
 def get_fallback_response(user_message: str) -> str:
     """Rule-based fallback responses for common career questions."""
     msg = user_message.lower()
