@@ -1,8 +1,9 @@
 import os
 import sys
+import streamlit as st  
 
-# This forces the running environment to see your modules and utils folders
-sys.path.append(os.path.dirname(os.path.abspath(__file__)))
+# Add project root to path to prevent folder resolution bugs
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
 from utils.database import init_db
 
