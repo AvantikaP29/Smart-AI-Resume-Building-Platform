@@ -1,9 +1,8 @@
-import streamlit as st
 import os
 import sys
 
-# Add project root to path
-sys.path.insert(0, os.path.dirname(__file__))
+# This forces the running environment to see your modules and utils folders
+sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
 from utils.database import init_db
 
