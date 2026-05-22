@@ -1,5 +1,3 @@
-
-
 import streamlit as st
 import os
 import sys
@@ -255,59 +253,19 @@ def init_session():
 init_session()
 
 
-# ─── ROUTING ──────────────────────────────────────────────────────────────────
-def route():
-    if not st.session_state.authenticated:
-        # Public pages: login / signup / forgot password
-        page = st.session_state.get("page", "login")
-        if page == "signup":
-            from modules.signup import show
-            show()
-        elif page == "forgot":
-            from modules.forgot_password import show
-            show()
-        else:
-            from modules.login import show
-            show()
-    else:
-        # Authenticated layout with sidebar
-        render_sidebar()
-        page = st.session_state.get("page", "dashboard")
-
-        if page == "dashboard":
-            from modules.dashboard import show
-            show()
-        elif page == "upload":
-            from modules.upload_resume import show
-            show()
-        elif page == "ats":
-            from modules.ats_analysis import show
-            show()
-        elif page == "prediction":
-            from modules.prediction import show
-            show()
-        elif page == "chatbot":
-            from modules.chatbot import show
-            show()
-        elif page == "analytics":
-            from modules.analytics import show
-            show()
-        elif page == "admin" and st.session_state.user.get("role") == "admin":
-            from modules.admin import show
-            show()
-        else:
-            from pages.dashboard import show
-            show()
-        
-
-
+# ─── NAVIGATION SIDEBAR (RENDERED ONLY AFTER LOGGED IN) ────────────────────────
 def render_sidebar():
     user = st.session_state.user
     is_admin = user.get("role") == "admin"
 
+    # Fetch the key securely from the background environment secrets
+    if "GEMINI_API_KEY" in st.secrets:
+        api_key = st.secrets["GEMINI_API_KEY"]
+    else:
+        api_key = None
+
     with st.sidebar:
         # Logo & branding
-        st.title("🧠 HireSense AI")
         st.markdown("""
         <div style="text-align:center; padding: 20px 0 10px;">
             <div style="font-size:2.5rem;">🧠</div>
@@ -322,7 +280,7 @@ def render_sidebar():
         <hr style="border-color:rgba(108,99,255,0.2); margin:10px 0;">
         """, unsafe_allow_html=True)
 
-        # User info
+        # User info card
         st.markdown(f"""
         <div style="background:rgba(108,99,255,0.1); border:1px solid rgba(108,99,255,0.2);
                     border-radius:10px; padding:12px; margin-bottom:12px;">
@@ -334,7 +292,7 @@ def render_sidebar():
         </div>
         """, unsafe_allow_html=True)
 
-        # Navigation
+        # App Navigation buttons
         nav_items = [
             ("🏠", "Dashboard", "dashboard"),
             ("📤", "Upload Resume", "upload"),
@@ -363,28 +321,21 @@ def render_sidebar():
 
         st.markdown("<hr style='border-color:rgba(108,99,255,0.2); margin:12px 0;'>", unsafe_allow_html=True)
 
-       # 1. Fetch the key from the background Streamlit secrets securely
-if "GEMINI_API_KEY" in st.secrets:
-    api_key = st.secrets["GEMINI_API_KEY"]
-else:
-    api_key = None
-
-# 2. Move the settings to the SIDEBAR to clean up the front login page
-with st.sidebar:
-    with st.expander("⚙️ AI Settings"):
-        if api_key:
-            st.success("🔒 System API Key is securely loaded and active.")
-        else:
-            api_key_input = st.text_input(
-                "Enter Personal Gemini API Key",
-                type="password",
-                placeholder="AIza...",
-                help="Get a free key at https://makersuite.google.com/app/apikey"
-            )
-            if api_key_input:
-                api_key = api_key_input
+        # Secure AI Settings block inside the sidebar
+        with st.expander("⚙️ AI Settings"):
+            if api_key:
+                st.success("🔒 System API Key is securely loaded and active.")
+            else:
+                api_key_input = st.text_input(
+                    "Enter Personal Gemini API Key",
+                    type="password",
+                    placeholder="AIza...",
+                    help="Get a free key at https://makersuite.google.com/app/apikey"
+                )
+                if api_key_input:
+                    api_key = api_key_input
             
-        # Logout
+        # Secure Logout sequence inside the sidebar
         st.markdown("<div style='height:20px;'></div>", unsafe_allow_html=True)
         if st.button("🚪  Logout", use_container_width=True):
             for key in ["authenticated", "user", "resume_parsed", "ats_report",
@@ -393,8 +344,7 @@ with st.sidebar:
             st.session_state.page = "login"
             st.rerun()
 
-        # Version footer
-    with st.sidebar:
+        # Branded footer inside the sidebar
         st.markdown("<div style='flex-grow: 1;'></div>", unsafe_allow_html=True)
         st.divider()
         st.markdown(
@@ -407,8 +357,53 @@ with st.sidebar:
         )
 
 
-# ─── MAIN ─────────────────────────────────────────────────────────────────────
+# ─── ROUTING & VIEW CONTROL ───────────────────────────────────────────────────
+def route():
+    if not st.session_state.authenticated:
+        # Public pages: login / signup / forgot password
+        page = st.session_state.get("page", "login")
+        if page == "signup":
+            from modules.signup import show
+            show()
+        elif page == "forgot":
+            from modules.forgot_password import show
+            show()
+        else:
+            from modules.login import show
+            show()
+    else:
+        # Authenticated dynamic dashboard view with navigation controls
+        render_sidebar()
+        page = st.session_state.get("page", "dashboard")
+
+        if page == "dashboard":
+            from modules.dashboard import show
+            show()
+        elif page == "upload":
+            from modules.upload_resume import show
+            show()
+        elif page == "ats":
+            from modules.ats_analysis import show
+            show()
+        elif page == "prediction":
+            from modules.prediction import show
+            show()
+        elif page == "chatbot":
+            from modules.chatbot import show
+            show()
+        elif page == "analytics":
+            from modules.analytics import show
+            show()
+        elif page == "admin" and st.session_state.user.get("role") == "admin":
+            from modules.admin import show
+            show()
+        else:
+            from pages.dashboard import show
+            show()
+
+
+# ─── MAIN EXECUTION ───────────────────────────────────────────────────────────
 if __name__ == "__main__":
     route()
-else:
-    route()
+
+
