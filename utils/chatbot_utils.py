@@ -37,17 +37,12 @@ Tailor all advice to this candidate's profile.
     return base
 
 
-def get_gemini_response(
-    messages: List[Dict],
-    api_key: str,
-    resume_context: Optional[Dict] = None
-) -> str:
-    """Get response from Google Gemini API using direct REST execution."""
+def get_gemini_response(prompt, api_key):
     try:
         INBUILT_KEY = api_key 
         
         if not INBUILT_KEY:
-            return "⚠️ Gemini API key is missing. Please check your sidebar settings."
+            return "⚠️ Gemini API key is missing. Please check your system settings."
 
         url = f"https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent?key={INBUILT_KEY}"
         
