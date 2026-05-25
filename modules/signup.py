@@ -34,7 +34,7 @@ def show():
 
         st.markdown("<div style='margin-top: 20px;'></div>", unsafe_allow_html=True)
 
-      # 3. Interactive Action Buttons Sequence
+    # 3. Interactive Action Buttons Sequence
         col_a, col_b = st.columns(2)
         with col_a:
             if st.button("✅ Create Account", use_container_width=True):
@@ -49,14 +49,13 @@ def show():
                 else:
                     result = create_user(username, email, password)
                     if result["success"]:
-                        # 🌟 SUCCESS MESSAGE & MANUAL REDIRECT TO LOGIN
-                        st.success("🎉 Account created successfully! Please log in below.")
+                        st.success("🎉 Account created successfully! Please log in with your credentials.")
                         
-                        # Reset authentication flags so they MUST type credentials
+                        # Clear any accidental auto-logins
                         st.session_state.authenticated = False
                         st.session_state.user = None
                         
-                        # Route back to the login screen
+                        # Redirect directly back to the clean manual login screen
                         st.session_state.page = "login"
                         st.rerun()
                     else:
