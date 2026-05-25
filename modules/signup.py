@@ -34,34 +34,30 @@ def show():
 
         st.markdown("<div style='margin-top: 20px;'></div>", unsafe_allow_html=True)
 
-       # 3. Interactive Action Buttons Sequence
+      # 3. Interactive Action Buttons Sequence
         col_a, col_b = st.columns(2)
         with col_a:
-          if st.button("✅ Create Account", use_container_width=True):
-            if not all([username, email, password, confirm]):
-                st.error("All fields are required.")
-            elif len(password) < 6:
-                st.error("Password must be at least 6 characters.")
-            elif password != confirm:
-                st.error("Passwords do not match.")
-            elif "@" not in email:
-                st.error("Invalid email address.")
-            else:
-                result = create_user(username, email, password)
-                if result["success"]:
-                    st.success("🎉 Account created successfully!")
-                    
-                    user_data = result.get("user", {})
-                    
-                    # 🔐 AUTHORIZE INSTANTLY
-                    st.session_state.authenticated = True
-                    st.session_state.user = {
-                        "id": user_data.get("id"),
-                        "username": user_data.get("username", username),
-                        "email": user_data.get("email", email),
-                        "role": user_data.get("role", "candidate")
-                    }
-                    st.session_state.page = "dashboard"
-                    st.rerun()
+            if st.button("✅ Create Account", use_container_width=True):
+                if not all([username, email, password, confirm]):
+                    st.error("All fields are required.")
+                elif len(password) < 6:
+                    st.error("Password must be at least 6 characters.")
+                elif password != confirm:
+                    st.error("Passwords do not match.")
+                elif "@" not in email:
+                    st.error("Invalid email address.")
                 else:
-                    st.error("❌ " + result["message"])
+                    result = create_user(username, email, password)
+                    if result["success"]:
+                        # 🌟 SUCCESS MESSAGE & MANUAL REDIRECT TO LOGIN
+                        st.success("🎉 Account created successfully! Please log in below.")
+                        
+                        # Reset authentication flags so they MUST type credentials
+                        st.session_state.authenticated = False
+                        st.session_state.user = None
+                        
+                        # Route back to the login screen
+                        st.session_state.page = "login"
+                        st.rerun()
+                    else:
+                        st.error("❌ " + result["message"])
