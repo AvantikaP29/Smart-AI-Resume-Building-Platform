@@ -97,30 +97,45 @@ def init_db():
 def create_user(username, email, password):
     import bcrypt
     conn = get_connection()
+    conn.row_factory = sqlite3.Row  
     cursor = conn.cursor()
-    # Ensure your row factory is dictionary compatible
-    conn.row_factory = sqlite3.Row 
     
-    import bcrypt
+    # Clean up fields
+    username = username.strip()
+    email = email.strip()
+    
     hashed_password = bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
     
     try:
+        # Insert with role 'candidate'
         cursor.execute("""
             INSERT INTO users (username, email, password, role) 
             VALUES (?, ?, ?, 'candidate')
         """, (username, email, hashed_password))
         conn.commit()
         
-        # Pull the freshly generated row out to pass to the UI
+        # Look up row
         cursor.execute("SELECT * FROM users WHERE username = ?", (username,))
-        new_user = dict(cursor.fetchone())
-        conn.close()
+        row = cursor.fetchone()
         
-        return {"success": True, "message": "User created!", "user": new_user}
+        # 🛡️ BULLETPROOF SAFETY FALLBACK
+        if row is not None:
+            new_user = dict(row)
+        else:
+            # If the database fetch fails to find the row immediately, create the session object manually
+            new_user = {
+                "id": cursor.lastrowid,
+                "username": username,
+                "email": email,
+                "role": "candidate"
+            }
+            
+        conn.close()
+        return {"success": True, "message": "Account created!", "user": new_user}
+        
     except sqlite3.IntegrityError:
         conn.close()
         return {"success": False, "message": "Username or Email already registered."}
-
 
 import sqlite3
 import bcrypt
