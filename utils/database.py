@@ -94,25 +94,31 @@ def init_db():
     conn.close()
 # ─── USER OPERATIONS ─────────────────────────────────────────────────────────
 
-def create_user(username: str, email: str, password: str) -> Dict[str, Any]:
-    """Create a new user with hashed password."""
+def create_user(username, email, password):
+    conn = get_connection()
+    cursor = conn.cursor()
+    # Ensure your row factory is dictionary compatible
+    conn.row_factory = sqlite3.Row 
+    
+    import bcrypt
+    hashed_password = bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
+    
     try:
-        conn = get_connection()
-        cursor = conn.cursor()
-        hashed = bcrypt.hashpw(password.encode(), bcrypt.gensalt()).decode()
-        cursor.execute(
-            "INSERT INTO users (username, email, password) VALUES (?, ?, ?)",
-            (username, email, hashed)
-        )
+        cursor.execute("""
+            INSERT INTO users (username, email, password, role) 
+            VALUES (?, ?, ?, 'candidate')
+        """, (username, email, hashed_password))
         conn.commit()
+        
+        # Pull the freshly generated row out to pass to the UI
+        cursor.execute("SELECT * FROM users WHERE username = ?", (username,))
+        new_user = dict(cursor.fetchone())
         conn.close()
-        return {"success": True, "message": "Account created successfully!"}
-    except sqlite3.IntegrityError as e:
-        if "username" in str(e):
-            return {"success": False, "message": "Username already exists."}
-        elif "email" in str(e):
-            return {"success": False, "message": "Email already registered."}
-        return {"success": False, "message": str(e)}
+        
+        return {"success": True, "message": "User created!", "user": new_user}
+    except sqlite3.IntegrityError:
+        conn.close()
+        return {"success": False, "message": "Username or Email already registered."}
 
 
 import sqlite3
