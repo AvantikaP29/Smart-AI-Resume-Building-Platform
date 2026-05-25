@@ -181,11 +181,11 @@ def send_message(user_text: str, user_id: int):
         })
 
     # 3. Execution Pipeline
-    if api_key:
+   if api_key:
         try:
             client = Groq(api_key=api_key)
             completion = client.chat.completions.create(
-                model="llama3-8b-8192",
+                model="llama-3.1-8b-instant",  
                 messages=api_messages,
                 temperature=0.7
             )
