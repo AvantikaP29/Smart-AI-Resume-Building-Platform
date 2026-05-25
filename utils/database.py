@@ -31,11 +31,19 @@ def init_db():
             username TEXT UNIQUE NOT NULL,
             email TEXT UNIQUE NOT NULL,
             password TEXT NOT NULL,
-            role TEXT DEFAULT 'user',
+            role TEXT DEFAULT 'candidate',
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
             last_login TIMESTAMP
         )
     """)
+
+    # 🛠️ LIVE MIGRATION PATCH: Forces 'email' column into existing deployments
+    try:
+        cursor.execute("ALTER TABLE users ADD COLUMN email TEXT")
+        conn.commit()
+    except sqlite3.OperationalError:
+        # Column already exists, safe to ignore!
+        pass
 
     # Resumes table
     cursor.execute("""
@@ -67,32 +75,22 @@ def init_db():
         )
     """)
 
-    conn.commit()
+    # Create default admin if not exists (Secure update)
+    admin_exists = cursor.execute("SELECT id FROM users WHERE role='admin'").fetchone()
+    NEW_STRONG_PASSWORD = "Avantika@#2026" # Change this!
 
-   # Create default admin if not exists
-    admin_exists = cursor.execute(
-        "SELECT id FROM users WHERE role='admin'"
-    ).fetchone()
-
-    # 🔒 CHANGE THIS to your chosen secure password string
-    NEW_STRONG_PASSWORD = "Avantika#$2026" 
-
+    import bcrypt
     if not admin_exists:
         hashed = bcrypt.hashpw(NEW_STRONG_PASSWORD.encode(), bcrypt.gensalt()).decode()
         cursor.execute(
             "INSERT OR IGNORE INTO users (username, email, password, role) VALUES (?, ?, ?, ?)",
             ("admin", "admin@resumeai.com", hashed, "admin")
         )
-        conn.commit()
     else:
-        # 🛡️ Force-update the password for your existing deployment
         hashed = bcrypt.hashpw(NEW_STRONG_PASSWORD.encode(), bcrypt.gensalt()).decode()
-        cursor.execute(
-            "UPDATE users SET password = ? WHERE username = 'admin'",
-            (hashed,)
-        )
-        conn.commit()
-
+        cursor.execute("UPDATE users SET password = ? WHERE role = 'admin'", (hashed,))
+        
+    conn.commit()
     conn.close()
 # ─── USER OPERATIONS ─────────────────────────────────────────────────────────
 
