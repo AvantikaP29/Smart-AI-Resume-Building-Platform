@@ -95,7 +95,7 @@ def init_db():
 # ─── USER OPERATIONS ─────────────────────────────────────────────────────────
 
 def create_user(username, email, password):
-    import bcyrpt
+    import bcrypt
     conn = get_connection()
     cursor = conn.cursor()
     # Ensure your row factory is dictionary compatible
