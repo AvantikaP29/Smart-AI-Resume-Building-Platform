@@ -37,7 +37,7 @@ def show():
        # 3. Interactive Action Buttons Sequence
         col_a, col_b = st.columns(2)
         with col_a:
-           if st.button("✅ Create Account", use_container_width=True):
+          if st.button("✅ Create Account", use_container_width=True):
             if not all([username, email, password, confirm]):
                 st.error("All fields are required.")
             elif len(password) < 6:
@@ -51,10 +51,17 @@ def show():
                 if result["success"]:
                     st.success("🎉 Account created successfully!")
                     
-                    # 🔐 AUTOMATIC LOGIN HOOK
+                    user_data = result.get("user", {})
+                    
+                    # 🔐 AUTHORIZE INSTANTLY
                     st.session_state.authenticated = True
-                    st.session_state.user = result.get("user")  # Saves the fresh user session
-                    st.session_state.page = "dashboard"          # Bypasses login page, routes straight to dashboard
+                    st.session_state.user = {
+                        "id": user_data.get("id"),
+                        "username": user_data.get("username", username),
+                        "email": user_data.get("email", email),
+                        "role": user_data.get("role", "candidate")
+                    }
+                    st.session_state.page = "dashboard"
                     st.rerun()
                 else:
                     st.error("❌ " + result["message"])
