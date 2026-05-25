@@ -14,8 +14,9 @@ DB_PATH = os.path.join(os.path.dirname(os.path.dirname(__file__)), "database.db"
 
 
 def get_connection():
-    """Returns a fresh connection instance for thread-safe operations."""
-    return sqlite3.connect("database.db", check_same_thread=False)
+    """Returns a fresh connection instance with a locked-in filename."""
+    # 🎯 CRITICAL: Make sure this EXACT filename matches everywhere in this file!
+    return sqlite3.connect("hiresense.db", check_same_thread=False)
 
 @st.cache_resource # ─── ADD THIS DECORATOR HERE ───
 def init_db():
