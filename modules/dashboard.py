@@ -1,4 +1,3 @@
-"""Main Dashboard page."""
 import streamlit as st
 from utils.database import get_user_resumes
 
@@ -31,9 +30,9 @@ def show():
     with c1:
         st.metric("📄 Resumes Uploaded", total)
     with c2:
-        st.metric("📊 Avg ATS Score", f"{avg_ats}/100")
+        st.metric("📊 Avg ATS Score", f"{avg_ats}/100" if total else "—")
     with c3:
-        st.metric("🏆 Best ATS Score", f"{best_ats}/100")
+        st.metric("🏆 Best ATS Score", f"{best_ats}/100" if total else "—")
     with c4:
         st.metric("🎯 Latest Prediction", best_role)
 
@@ -88,22 +87,27 @@ def show():
             fname = r["filename"] or "resume"
             date = str(r["uploaded_at"])[:10]
 
-            st.markdown(f"""
-            <div style="background:#1e2035; border:1px solid rgba(108,99,255,0.2);
-                        border-radius:12px; padding:16px; margin:8px 0;
-                        display:flex; justify-content:space-between; align-items:center;">
-                <div>
-                    <div style="font-weight:600; color:#e8eaf6;">📄 {fname}</div>
-                    <div style="color:#9fa8da; font-size:0.8rem; margin-top:2px;">
-                        🎯 {role} &nbsp;|&nbsp; 📅 {date}
-                    </div>
+            # FIXED: Using st.container with nested columns to replace broken flexbox CSS
+            with st.container():
+                st.markdown(f"""
+                <div style="background:#1e2035; border:1px solid rgba(108,99,255,0.2);
+                            border-radius:12px; padding:16px; margin:4px 0;">
+                    <table style="width:100%; border:none; border-collapse:collapse;">
+                        <tr>
+                            <td style="text-align:left; border:none; padding:0;">
+                                <div style="font-weight:600; color:#e8eaf6; font-size:1rem;">📄 {fname}</div>
+                                <div style="color:#9fa8da; font-size:0.8rem; margin-top:4px;">
+                                    🎯 {role} &nbsp;|&nbsp; 📅 {date}
+                                </div>
+                            </td>
+                            <td style="text-align:right; width:80px; border:none; padding:0;">
+                                <div style="font-size:1.5rem; font-weight:700; color:#6c63ff; line-height:1.1;">{ats:.0f}</div>
+                                <div style="font-size:0.75rem; color:{cat_color}; font-weight:600; margin-top:2px;">{cat}</div>
+                            </td>
+                        </tr>
+                    </table>
                 </div>
-                <div style="text-align:right;">
-                    <div style="font-size:1.4rem; font-weight:700; color:#6c63ff;">{ats:.0f}</div>
-                    <div style="font-size:0.75rem; color:{cat_color}; font-weight:600;">{cat}</div>
-                </div>
-            </div>
-            """, unsafe_allow_html=True)
+                """, unsafe_allow_html=True)
 
     # Getting started guide
     if not resumes:
