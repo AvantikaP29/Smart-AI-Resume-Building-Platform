@@ -16,7 +16,7 @@ st.set_page_config(
     initial_sidebar_state="expanded",
     menu_items={
         "Get Help": "https://github.com",
-        "About": "AI Resume Screening & Job Role Prediction System v1.0"
+        "About": "AI Resume Building & Job Role Prediction System v1.0"
     }
 )
 
@@ -301,6 +301,7 @@ def render_sidebar():
         """, unsafe_allow_html=True)
 
         # App Navigation buttons
+        # ─── Standard Candidate Navigation Items ──────────────────────────────
         nav_items = [
             ("🏠", "Dashboard", "dashboard"),
             ("📤", "Upload Resume", "upload"),
@@ -309,16 +310,16 @@ def render_sidebar():
             ("🤖", "AI Chatbot", "chatbot"),
             ("📈", "Analytics", "analytics"),
         ]
-        if is_admin:
+        
+        # 🛡️ ROLE GATE: Only append the Admin Panel if the user is explicitly you
+        user_role = st.session_state.user.get("role", "candidate") if "user" in st.session_state else "candidate"
+        
+        if user_role == "admin":
             nav_items.append(("🛡️", "Admin Panel", "admin"))
 
+        # Render the dynamic navigation buttons
         for icon, label, page_key in nav_items:
             active = st.session_state.page == page_key
-            btn_style = (
-                "background:rgba(108,99,255,0.2); color:#6c63ff; border:1px solid rgba(108,99,255,0.4);"
-                if active else
-                "background:transparent; color:#9fa8da; border:1px solid transparent;"
-            )
             if st.button(
                 f"{icon}  {label}",
                 key=f"nav_{page_key}",
