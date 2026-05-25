@@ -181,7 +181,7 @@ def send_message(user_text: str, user_id: int):
         })
 
     # 3. Execution Pipeline
-   if api_key:
+    if api_key:
         try:
             client = Groq(api_key=api_key)
             completion = client.chat.completions.create(
