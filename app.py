@@ -402,7 +402,7 @@ def route():
         elif page == "chatbot":
             from modules.chatbot import show
             show()
-       elif page == "analytics":
+        elif page == "analytics":
             from modules.analytics import show
             show()
         elif page == "admin":
