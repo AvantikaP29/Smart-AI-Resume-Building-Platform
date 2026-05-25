@@ -1,13 +1,14 @@
 """
 AI Chatbot Page
-Career guidance chatbot powered by Google Gemini API.
+Career guidance chatbot powered by Groq API.
 Features: resume-aware context, chat history, quick prompts,
 conversation memory, and fallback rule-based responses.
 """
 
 import streamlit as st
 import time
-from utils.chatbot_utils import get_gemini_response, get_fallback_response
+from groq import Groq  # <-- IMPORT GROQ CLIENT
+from utils.chatbot_utils import get_fallback_response
 from utils.database import save_chat_message, get_chat_history, clear_chat_history
 
 # ─── QUICK PROMPT CATEGORIES ──────────────────────────────────────────────────
@@ -31,7 +32,7 @@ QUICK_PROMPTS = {
 }
 
 GREETING_MESSAGES = [
-    "Hello! I'm **HireSense AI** 🤖 — your personal career coach.",
+    "Hello! I'm **HireSense AI** 🤖 — your personal career coach powered by Groq.",
     "I can help you with resume improvement, career roadmaps, interview prep, and more.",
     "Type your question below or pick a quick prompt to get started! 🚀",
 ]
@@ -114,7 +115,6 @@ def render_side_panel(user):
 def render_chat_window(user):
     chat_history = st.session_state.get("chat_history", [])
 
-    # Container for messages
     chat_container = st.container(height=500)
 
     with chat_container:
@@ -125,7 +125,6 @@ def render_chat_window(user):
             for msg in chat_history:
                 render_message(msg["role"], msg.get("content", msg.get("message", "")))
 
-    # FIXED INPUT: This uses st.chat_input which clears itself to stop loops
     if prompt := st.chat_input("Ask HireSense AI anything..."):
         send_message(prompt, user["id"])
         st.rerun()
@@ -156,7 +155,6 @@ def send_message(user_text: str, user_id: int):
     if not user_text.strip():
         return
 
-    # Check for accidental double-submissions
     if st.session_state.chat_history and st.session_state.chat_history[-1].get("content") == user_text:
         return
 
@@ -164,19 +162,39 @@ def send_message(user_text: str, user_id: int):
     st.session_state.chat_history.append({"role": "user", "content": user_text})
     save_chat_message(user_id, "user", user_text)
 
-    # Bot Logic
-    api_key = st.session_state.get("gemini_api_key", "")
+    # 1. Fetch Key from secure Streamlit Secrets backend
+    api_key = st.secrets.get("GROQ_API_KEY", "")
     resume_ctx = build_resume_context()
 
-    # Prepare history for AI
-    api_messages = [{"role": m["role"], "content": m.get("content", m.get("message", ""))} for m in
-                    st.session_state.chat_history[-10:]]
+    # 2. Build thread logs compatible with standard API completion shapes
+    api_messages = []
+    
+    # Inject context system prompt if user profile metadata is detected
+    if resume_ctx:
+        system_prompt = f"You are HireSense AI assistant. The current user is a candidate seeking a job as a '{resume_ctx.get('predicted_role')}' with an ATS resume profile score of {resume_ctx.get('ats_score')}/100. Tailor answers contextually."
+        api_messages.append({"role": "system", "content": system_prompt})
 
+    for m in st.session_state.chat_history[-10:]:
+        api_messages.append({
+            "role": m["role"], 
+            "content": m.get("content", m.get("message", ""))
+        })
+
+    # 3. Execution Pipeline
     if api_key:
-        response = get_gemini_response(api_messages, api_key, resume_ctx)
+        try:
+            client = Groq(api_key=api_key)
+            completion = client.chat.completions.create(
+                model="llama3-8b-8192",
+                messages=api_messages,
+                temperature=0.7
+            )
+            response = completion.choices[0].message.content
+        except Exception as e:
+            response = f"⚠️ The chatbot is currently experiencing technical difficulties connectivity-side. Error details: {str(e)}"
     else:
-        response = get_fallback_response(user_text) or "Please add an API key in settings."
+        response = get_fallback_response(user_text) or "Please ensure your GROQ_API_KEY is configured in secrets.toml."
 
-    # Assistant Message
+    # Assistant Response Setup
     st.session_state.chat_history.append({"role": "assistant", "content": response})
     save_chat_message(user_id, "assistant", response)
