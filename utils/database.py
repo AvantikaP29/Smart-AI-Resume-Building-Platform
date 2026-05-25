@@ -18,14 +18,14 @@ def get_connection():
     # 🎯 CRITICAL: Make sure this EXACT filename matches everywhere in this file!
     return sqlite3.connect("hiresense.db", check_same_thread=False)
 
-@st.cache_resource # ─── ADD THIS DECORATOR HERE ───
+@st.cache_resource
 def init_db():
+    """Initialize database with all required tables exactly once."""
     import bcrypt
-    """Initialize database with all required tables exactly once on boot."""
     conn = get_connection()
     cursor = conn.cursor()
 
-    # Users table
+    # Create Users table explicitly
     cursor.execute("""
         CREATE TABLE IF NOT EXISTS users (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -37,6 +37,11 @@ def init_db():
             last_login TIMESTAMP
         )
     """)
+    
+    # ... Your resumes table and chat history table execution lines remain the same ...
+
+    conn.commit()
+    conn.close()
 
     # 🛠️ LIVE MIGRATION PATCH: Forces 'email' column into existing deployments
     try:
