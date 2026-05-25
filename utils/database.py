@@ -75,7 +75,7 @@ def init_db():
     ).fetchone()
 
     # 🔒 CHANGE THIS to your chosen secure password string
-    NEW_STRONG_PASSWORD = "YourSuperSecurePassword2026!" 
+    NEW_STRONG_PASSWORD = "Avantika#$2026" 
 
     if not admin_exists:
         hashed = bcrypt.hashpw(NEW_STRONG_PASSWORD.encode(), bcrypt.gensalt()).decode()
