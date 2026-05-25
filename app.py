@@ -1,6 +1,7 @@
 import os
 import sys
-import streamlit as st  
+import streamlit as st 
+from groq import Groq
 
 # Add project root to path to prevent folder resolution bugs
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
@@ -258,11 +259,13 @@ def render_sidebar():
     user = st.session_state.user
     is_admin = user.get("role") == "admin"
 
-    # Fetch the key securely from the background environment secrets
-    if "GEMINI_API_KEY" in st.secrets:
-        api_key = st.secrets["GEMINI_API_KEY"]
+    # This only LOOKS for a secret named "GROQ_API_KEY" in the background
+    if "GROQ_API_KEY" in st.secrets:
+        api_key = st.secrets["GROQ_API_KEY"]
     else:
         api_key = None
+        
+    return api_key
 
     with st.sidebar:
         # Logo & branding
