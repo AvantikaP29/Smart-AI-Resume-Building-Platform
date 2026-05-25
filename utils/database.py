@@ -13,10 +13,8 @@ DB_PATH = os.path.join(os.path.dirname(os.path.dirname(__file__)), "database.db"
 
 
 def get_connection():
-    """Get SQLite database connection."""
-    conn = sqlite3.connect(DB_PATH, check_same_thread=False)
-    conn.row_factory = sqlite3.Row
-    return conn
+    """Returns a fresh connection instance for thread-safe operations."""
+    return sqlite3.connect("database.db", check_same_thread=False)
 
 @st.cache_resource # ─── ADD THIS DECORATOR HERE ───
 def init_db():
