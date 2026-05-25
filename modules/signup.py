@@ -37,26 +37,24 @@ def show():
        # 3. Interactive Action Buttons Sequence
         col_a, col_b = st.columns(2)
         with col_a:
-            if st.button("✅ Create Account", use_container_width=True):
-                if not all([username, email, password, confirm]):
-                    st.error("All fields are required.")
-                elif len(password) < 6:
-                    st.error("Password must be at least 6 characters.")
-                elif password != confirm:
-                    st.error("Passwords do not match.")
-                elif "@" not in email:
-                    st.error("Invalid email address.")
+           if st.button("✅ Create Account", use_container_width=True):
+            if not all([username, email, password, confirm]):
+                st.error("All fields are required.")
+            elif len(password) < 6:
+                st.error("Password must be at least 6 characters.")
+            elif password != confirm:
+                st.error("Passwords do not match.")
+            elif "@" not in email:
+                st.error("Invalid email address.")
+            else:
+                result = create_user(username, email, password)
+                if result["success"]:
+                    st.success("🎉 Account created successfully!")
+                    
+                    # 🔐 AUTOMATIC LOGIN HOOK
+                    st.session_state.authenticated = True
+                    st.session_state.user = result.get("user")  # Saves the fresh user session
+                    st.session_state.page = "dashboard"          # Bypasses login page, routes straight to dashboard
+                    st.rerun()
                 else:
-                    result = create_user(username, email, password)
-                    if result["success"]:
-                        st.success("🎉 Account created successfully!")
-                        
-                        # 🔐 INSTANT DIRECT AUTHENTICATION
-                        st.session_state.authenticated = True
-                        st.session_state.user = result.get("user")  # Logged in instantly
-                        st.session_state.page = "dashboard"
-                        
-                        st.info("Directing you straight to your workspace...")
-                        st.rerun()
-                    else:
-                        st.error("❌ " + result["message"])
+                    st.error("❌ " + result["message"])
