@@ -18,9 +18,9 @@ def get_connection():
     conn.row_factory = sqlite3.Row
     return conn
 
-
+@st.cache_resource # ─── ADD THIS DECORATOR HERE ───
 def init_db():
-    """Initialize database with all required tables."""
+    """Initialize database with all required tables exactly once on boot."""
     conn = get_connection()
     cursor = conn.cursor()
 
