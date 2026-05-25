@@ -18,6 +18,7 @@ def get_connection():
 
 @st.cache_resource # ─── ADD THIS DECORATOR HERE ───
 def init_db():
+    import bcrypt
     """Initialize database with all required tables exactly once on boot."""
     conn = get_connection()
     cursor = conn.cursor()
@@ -93,6 +94,7 @@ def init_db():
 # ─── USER OPERATIONS ─────────────────────────────────────────────────────────
 
 def create_user(username, email, password):
+    import bcyrpt
     conn = get_connection()
     cursor = conn.cursor()
     # Ensure your row factory is dictionary compatible
