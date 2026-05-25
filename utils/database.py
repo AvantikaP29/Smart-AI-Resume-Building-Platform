@@ -15,7 +15,8 @@ DB_PATH = os.path.join(os.path.dirname(os.path.dirname(__file__)), "database.db"
 
 def get_connection():
     """Returns a fresh connection instance with a locked-in filename."""
-    return sqlite3.connect("database.db", check_same_thread=False)
+    # 🎯 FIX: Make sure this says "hiresense.db" to match your login module!
+    return sqlite3.connect("hiresense.db", check_same_thread=False)
 
 
 @st.cache_resource
@@ -144,7 +145,8 @@ import sqlite3
 import bcrypt
 
 def authenticate_user(username_or_email, password):
-    conn = sqlite3.connect("hiresense.db")  # Replace with your actual database filename
+    # 🎯 FIX: Use the helper so it looks at the exact same file!
+    conn = get_connection() 
     conn.row_factory = sqlite3.Row
     cursor = conn.cursor()
     
