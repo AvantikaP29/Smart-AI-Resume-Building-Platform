@@ -185,7 +185,7 @@ def send_message(user_text: str, user_id: int):
         try:
             client = Groq(api_key=api_key)
             completion = client.chat.completions.create(
-                model="llama-3.1-8b-instant",  
+                model="llama-3.1-8b-instant",
                 messages=api_messages,
                 temperature=0.7
             )
@@ -194,7 +194,6 @@ def send_message(user_text: str, user_id: int):
             response = f"⚠️ The chatbot is currently experiencing technical difficulties connectivity-side. Error details: {str(e)}"
     else:
         response = get_fallback_response(user_text) or "Please ensure your GROQ_API_KEY is configured in secrets.toml."
-
     # Assistant Response Setup
     st.session_state.chat_history.append({"role": "assistant", "content": response})
     save_chat_message(user_id, "assistant", response)
