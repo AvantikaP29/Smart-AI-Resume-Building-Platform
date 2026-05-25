@@ -15,17 +15,18 @@ DB_PATH = os.path.join(os.path.dirname(os.path.dirname(__file__)), "database.db"
 
 def get_connection():
     """Returns a fresh connection instance with a locked-in filename."""
-    # 🎯 CRITICAL: Make sure this EXACT filename matches everywhere in this file!
-    return sqlite3.connect("hiresense.db", check_same_thread=False)
+    return sqlite3.connect("database.db", check_same_thread=False)
+
 
 @st.cache_resource
 def init_db():
-    """Initialize database with all required tables exactly once."""
+    """Initialize database with all required tables exactly once on boot."""
     import bcrypt
+
     conn = get_connection()
     cursor = conn.cursor()
 
-    # Create Users table explicitly
+    # 1. Clean Users Table Creation (Email is now native, no alter needed)
     cursor.execute("""
         CREATE TABLE IF NOT EXISTS users (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -37,21 +38,8 @@ def init_db():
             last_login TIMESTAMP
         )
     """)
-    
-    # ... Your resumes table and chat history table execution lines remain the same ...
 
-    conn.commit()
-    conn.close()
-
-    # 🛠️ LIVE MIGRATION PATCH: Forces 'email' column into existing deployments
-    try:
-        cursor.execute("ALTER TABLE users ADD COLUMN email TEXT")
-        conn.commit()
-    except sqlite3.OperationalError:
-        # Column already exists, safe to ignore!
-        pass
-
-    # Resumes table
+    # 2. Resumes table
     cursor.execute("""
         CREATE TABLE IF NOT EXISTS resumes (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -69,7 +57,7 @@ def init_db():
         )
     """)
 
-    # Chat history table
+    # 3. Chat history table
     cursor.execute("""
         CREATE TABLE IF NOT EXISTS chat_history (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -81,21 +69,30 @@ def init_db():
         )
     """)
 
-    # Create default admin if not exists (Secure update)
-    admin_exists = cursor.execute("SELECT id FROM users WHERE role='admin'").fetchone()
-    NEW_STRONG_PASSWORD = "Avantika@#2026" # Change this!
+    # 4. Handle default admin creation cleanly
+    admin_exists = cursor.execute(
+        "SELECT id FROM users WHERE role='admin'"
+    ).fetchone()
+    NEW_STRONG_PASSWORD = (
+        "YourSuperSecurePassword2026!"  # Change this to your preferred pass
+    )
 
-    import bcrypt
     if not admin_exists:
-        hashed = bcrypt.hashpw(NEW_STRONG_PASSWORD.encode(), bcrypt.gensalt()).decode()
+        hashed = bcrypt.hashpw(
+            NEW_STRONG_PASSWORD.encode(), bcrypt.gensalt()
+        ).decode()
         cursor.execute(
             "INSERT OR IGNORE INTO users (username, email, password, role) VALUES (?, ?, ?, ?)",
-            ("admin", "admin@resumeai.com", hashed, "admin")
+            ("admin", "admin@resumeai.com", hashed, "admin"),
         )
     else:
-        hashed = bcrypt.hashpw(NEW_STRONG_PASSWORD.encode(), bcrypt.gensalt()).decode()
-        cursor.execute("UPDATE users SET password = ? WHERE role = 'admin'", (hashed,))
-        
+        hashed = bcrypt.hashpw(
+            NEW_STRONG_PASSWORD.encode(), bcrypt.gensalt()
+        ).decode()
+        cursor.execute(
+            "UPDATE users SET password = ? WHERE role = 'admin'", (hashed,)
+        )
+
     conn.commit()
     conn.close()
 # ─── USER OPERATIONS ─────────────────────────────────────────────────────────
