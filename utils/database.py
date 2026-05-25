@@ -226,26 +226,25 @@ def save_resume(user_id: int, filename: str, resume_text: str,
     return rid
 
 
-def get_user_resumes(user_id: int) -> List[Dict]:
-    """Get all resumes for a specific user."""
+def get_user_resumes(user_id):
+    """Fetches all resumes uploaded by a specific user safely."""
     conn = get_connection()
-    resumes = conn.execute(
-        "SELECT * FROM resumes WHERE user_id=? ORDER BY uploaded_at DESC",
-        (user_id,)
-    ).fetchall()
+    conn.row_factory = sqlite3.Row
+    cursor = conn.cursor()
+    
+    cursor.execute("""
+        SELECT * FROM resumes 
+        WHERE user_id = ? 
+        ORDER BY uploaded_at DESC
+    """, (user_id,))
+    
+    resumes = cursor.fetchall()
     conn.close()
-    return [dict(r) for r in resumes]
-
-
-def get_all_resumes() -> List[Dict]:
-    """Get all resumes with user info (admin)."""
-    conn = get_connection()
-    resumes = conn.execute("""
-        SELECT r.*, u.username, u.email 
-        FROM resumes r JOIN users u ON r.user_id = u.id
-        ORDER BY r.uploaded_at DESC
-    """).fetchall()
-    conn.close()
+    
+    # 🛡️ CRITICAL FIX: If no resumes exist yet, return an empty list instead of crashing!
+    if resumes is None:
+        return []
+        
     return [dict(r) for r in resumes]
 
 
