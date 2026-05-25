@@ -7,17 +7,17 @@ def show():
     _, col2, _ = st.columns([1, 1.4, 1])
     
     with col2:
-        # 1. Clean, Perfectly Centered Branding Header
+        # 1. Clean, Perfectly Balanced Branding Header (Shifted slightly left for true optical center)
         st.markdown("""
-        <div style="text-align:center; padding: 30px 0 20px; width: 100%;">
+        <div style="text-align:center; padding: 30px 15px 20px 0px; width: 100%;">
             <div style="font-size:3.5rem; margin-bottom: 10px; text-align: center;">🧠</div>
             <h1 style="background:linear-gradient(135deg,#6c63ff,#00d4aa);
                         -webkit-background-clip:text; -webkit-text-fill-color:transparent;
                         font-size:2.5rem; margin:0; font-weight: 700; text-align: center; display: block;">
                 HireSense AI
             </h1>
-            <p style="color:#9fa8da; font-size:1rem; margin-top: 8px; text-align: center;">
-                Smart Recruitment Platform
+            <p style="color:#9fa8da; font-size:1rem; margin-top: 8px; text-align: center; font-weight: 500;">
+                Smart Resume Building Platform
             </p>
         </div>
         """, unsafe_allow_html=True)
