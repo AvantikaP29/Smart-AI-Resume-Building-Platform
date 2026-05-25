@@ -34,7 +34,7 @@ def show():
 
         st.markdown("<div style='margin-top: 20px;'></div>", unsafe_allow_html=True)
 
-        # 3. Interactive Action Buttons Sequence
+       # 3. Interactive Action Buttons Sequence
         col_a, col_b = st.columns(2)
         with col_a:
             if st.button("✅ Create Account", use_container_width=True):
@@ -49,15 +49,14 @@ def show():
                 else:
                     result = create_user(username, email, password)
                     if result["success"]:
-                        st.success("✅ " + result["message"])
-                        st.info("Redirecting to login...")
-                        st.session_state.page = "login"
+                        st.success("🎉 Account created successfully!")
+                        
+                        # 🔐 INSTANT DIRECT AUTHENTICATION
+                        st.session_state.authenticated = True
+                        st.session_state.user = result.get("user")  # Logged in instantly
+                        st.session_state.page = "dashboard"
+                        
+                        st.info("Directing you straight to your workspace...")
                         st.rerun()
                     else:
                         st.error("❌ " + result["message"])
-                        
-        with col_b:
-            if st.button("← Back to Login", use_container_width=True):
-                st.session_state.page = "login"
-                st.rerun()
-
