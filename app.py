@@ -402,15 +402,19 @@ def route():
         elif page == "chatbot":
             from modules.chatbot import show
             show()
-        elif page == "analytics":
+       elif page == "analytics":
             from modules.analytics import show
             show()
-        elif page == "admin" and st.session_state.user.get("role") == "admin":
-            from modules.admin import show
-            show()
-        else:
-            from pages.dashboard import show
-            show()
+        elif page == "admin":
+            # Double-check authorization before importing the module
+            user_role = st.session_state.user.get("role", "candidate") if "user" in st.session_state else "candidate"
+            if user_role == "admin":
+                from modules.admin import show
+                show()
+            else:
+                # Redirect unauthorized users straight back to the dashboard
+                st.session_state.page = "dashboard"
+                st.rerun()
 
 
 # ─── MAIN EXECUTION ───────────────────────────────────────────────────────────
