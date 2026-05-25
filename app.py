@@ -256,14 +256,20 @@ init_session()
 
 # ─── NAVIGATION SIDEBAR (RENDERED ONLY AFTER LOGGED IN) ────────────────────────
 def render_sidebar():
-    user = st.session_state.user
-    is_admin = user.get("role") == "admin"
+    # 1. Safely check if user exists in session state to prevent crashing
+    if "user" in st.session_state and st.session_state.user:
+        user = st.session_state.user
+        is_admin = user.get("role") == "admin"
+    else:
+        is_admin = False
 
-    # This only LOOKS for a secret named "GROQ_API_KEY" in the background
+    # 2. Fetch the Groq key securely from background environment secrets
     if "GROQ_API_KEY" in st.secrets:
         api_key = st.secrets["GROQ_API_KEY"]
     else:
         api_key = None
+        # Use warning instead of error so it doesn't look like a system crash
+        st.sidebar.warning("⚠️ Groq API Key missing in secrets.")
         
     return api_key
 
