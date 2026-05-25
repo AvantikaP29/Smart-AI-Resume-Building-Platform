@@ -27,6 +27,8 @@ bcrypt>=4.1.0
 # AI Chatbot
 google-generativeai>=0.8.0
 openai>=1.14.3
+groq
+python-dotenv
 
 # Utilities
 python-dateutil>=2.9.0
