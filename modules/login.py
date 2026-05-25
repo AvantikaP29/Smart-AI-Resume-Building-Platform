@@ -1,38 +1,37 @@
 """Login page for HireSense AI."""
-"""Login page for HireSense AI."""
 import streamlit as st
 from utils.database import authenticate_user
 
 def show():
-    # Centered column layout layout helper
+    # Centered column layout helper
     _, col2, _ = st.columns([1, 1.4, 1])
     
     with col2:
-        # 1. Clean Branding Header (No weird floating border spacers)
+        # 1. Clean, Perfectly Centered Branding Header
         st.markdown("""
-        <div style="text-align:center; padding: 20px 0 10px;">
-            <div style="font-size:3.5rem; margin-bottom: 10px;">🧠</div>
+        <div style="text-align:center; padding: 30px 0 20px; width: 100%;">
+            <div style="font-size:3.5rem; margin-bottom: 10px; text-align: center;">🧠</div>
             <h1 style="background:linear-gradient(135deg,#6c63ff,#00d4aa);
                         -webkit-background-clip:text; -webkit-text-fill-color:transparent;
-                        font-size:2.2rem; margin:0; font-weight: 700;">HireSense AI</h1>
-            <p style="color:#9fa8da; font-size:0.95rem; margin-top: 5px;">Smart Recruitment Platform</p>
+                        font-size:2.5rem; margin:0; font-weight: 700; text-align: center; display: block;">
+                HireSense AI
+            </h1>
+            <p style="color:#9fa8da; font-size:1rem; margin-top: 8px; text-align: center;">
+                Smart Recruitment Platform
+            </p>
         </div>
         """, unsafe_allow_html=True)
 
-        # 2. Fixed Neutral Entry Header (Replaced "Welcome Back" so it's clean for fresh users)
-        st.markdown("""
-        <h3 style='color:#e8eaf6; text-align: center; margin-top: 15px; margin-bottom: 25px; font-weight: 500;'>
-            🔑 Account Access Portal
-        </h3>
-        """, unsafe_allow_html=True)
+        # Space divider between logo and input elements
+        st.markdown("<div style='margin-top: 15px;'></div>", unsafe_allow_html=True)
 
-        # 3. Input Fields (Completely empty, secure, and formatting-error free)
+        # 2. Input Fields (Completely empty and secure)
         username = st.text_input("Username or Email", placeholder="Enter your username or email")
         password = st.text_input("Password", type="password", placeholder="Enter your password")
 
-        st.markdown("<div style='margin-top: 15px;'></div>", unsafe_allow_html=True)
+        st.markdown("<div style='margin-top: 20px;'></div>", unsafe_allow_html=True)
 
-        # 4. Interactive Action Buttons Sequence
+        # 3. Interactive Action Buttons Sequence
         col_a, col_b = st.columns(2)
         with col_a:
             if st.button("🚀 Login", use_container_width=True):
@@ -58,5 +57,3 @@ def show():
         if st.button("🔑 Forgot Password?", use_container_width=True):
             st.session_state.page = "forgot"
             st.rerun()
-
-        # ❌ REMOVED: The old "Default Admin: admin / admin123" leakage string has been completely wiped out.
