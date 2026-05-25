@@ -21,7 +21,10 @@ st.set_page_config(
 )
 
 # ─── INITIALIZE DATABASE ──────────────────────────────────────────────────────
-init_db()
+# ─── INITIALIZE DATABASE (UPDATED SECURITY GATE) ──────────────────────────────
+if "db_initialized" not in st.session_state:
+    init_db()
+    st.session_state.db_initialized = True
 
 # ─── GLOBAL CSS ───────────────────────────────────────────────────────────────
 st.markdown("""
