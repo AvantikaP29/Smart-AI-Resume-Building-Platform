@@ -261,6 +261,7 @@ def render_sidebar():
         user = st.session_state.user
         is_admin = user.get("role") == "admin"
     else:
+        user = {"username": "Guest", "role": "candidate"}
         is_admin = False
 
     # 2. Fetch the Groq key securely from background environment secrets
@@ -270,8 +271,6 @@ def render_sidebar():
         api_key = None
         # Use warning instead of error so it doesn't look like a system crash
         st.sidebar.warning("⚠️ Groq API Key missing in secrets.")
-        
-    return api_key
 
     with st.sidebar:
         # Logo & branding
@@ -336,10 +335,10 @@ def render_sidebar():
                 st.success("🔒 System API Key is securely loaded and active.")
             else:
                 api_key_input = st.text_input(
-                    "Enter Personal Gemini API Key",
+                    "Enter Personal Groq API Key",
                     type="password",
-                    placeholder="AIza...",
-                    help="Get a free key at https://makersuite.google.com/app/apikey"
+                    placeholder="gsk_...",
+                    help="Get a key from your Groq console dashboard"
                 )
                 if api_key_input:
                     api_key = api_key_input
@@ -359,11 +358,13 @@ def render_sidebar():
         st.markdown(
             """
             <div style="text-align:center; font-size:0.7rem; color:#888888; padding-bottom: 20px;">
-                HireSense AI v1.0 • Powered by Gemini
+                HireSense AI v1.0 • Powered by Groq
             </div>
             """,
             unsafe_allow_html=True
         )
+        
+    return api_key
 
 
 # ─── ROUTING & VIEW CONTROL ───────────────────────────────────────────────────
@@ -414,5 +415,3 @@ def route():
 # ─── MAIN EXECUTION ───────────────────────────────────────────────────────────
 if __name__ == "__main__":
     route()
-
-
