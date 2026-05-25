@@ -65,9 +65,11 @@ def format_time() -> str:
 def show():
     user = st.session_state.user
 
-    if not st.session_state.get("chat_history"):
-        st.session_state.chat_history = get_chat_history(user["id"], limit=30)
-
+    # Force a fresh screen whenever navigating to this page
+    # It will only track messages sent during this active session
+    if "current_page_loaded" not in st.session_state or st.session_state.current_page_loaded != "chatbot":
+        st.session_state.chat_history = []
+        st.session_state.current_page_loaded = "chatbot"
     st.markdown("""
     <h1 style='color:#e8eaf6; margin-bottom:4px;'>🤖 HireSense AI Assistant</h1>
     <p style='color:#9fa8da; margin-bottom:24px;'>Get personalized career guidance and resume tips.</p>
