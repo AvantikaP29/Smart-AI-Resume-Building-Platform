@@ -244,7 +244,7 @@ def init_session():
         "ats_report": None,
         "prediction": None,
         "chat_history": [],
-        "gemini_api_key": "",
+        "groq_api_key": "",
         "theme": "dark",
     }
     for k, v in defaults.items():
