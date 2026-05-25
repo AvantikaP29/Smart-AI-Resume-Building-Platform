@@ -69,22 +69,31 @@ def init_db():
 
     conn.commit()
 
-    # Create default admin if not exists
+   # Create default admin if not exists
     admin_exists = cursor.execute(
         "SELECT id FROM users WHERE role='admin'"
     ).fetchone()
 
+    # 🔒 CHANGE THIS to your chosen secure password string
+    NEW_STRONG_PASSWORD = "YourSuperSecurePassword2026!" 
+
     if not admin_exists:
-        hashed = bcrypt.hashpw("admin123".encode(), bcrypt.gensalt()).decode()
+        hashed = bcrypt.hashpw(NEW_STRONG_PASSWORD.encode(), bcrypt.gensalt()).decode()
         cursor.execute(
             "INSERT OR IGNORE INTO users (username, email, password, role) VALUES (?, ?, ?, ?)",
             ("admin", "admin@resumeai.com", hashed, "admin")
         )
         conn.commit()
+    else:
+        # 🛡️ Force-update the password for your existing deployment
+        hashed = bcrypt.hashpw(NEW_STRONG_PASSWORD.encode(), bcrypt.gensalt()).decode()
+        cursor.execute(
+            "UPDATE users SET password = ? WHERE username = 'admin'",
+            (hashed,)
+        )
+        conn.commit()
 
     conn.close()
-
-
 # ─── USER OPERATIONS ─────────────────────────────────────────────────────────
 
 def create_user(username: str, email: str, password: str) -> Dict[str, Any]:
