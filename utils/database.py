@@ -117,25 +117,32 @@ def create_user(username: str, email: str, password: str) -> Dict[str, Any]:
         return {"success": False, "message": str(e)}
 
 
-def authenticate_user(username: str, password: str) -> Optional[Dict]:
-    """Authenticate user credentials."""
-    conn = get_connection()
-    cursor = conn.cursor()
-    user = cursor.execute(
-        "SELECT * FROM users WHERE username=? OR email=?", (username, username)
-    ).fetchone()
-    conn.close()
+import sqlite3
+import bcrypt
 
-    if user and bcrypt.checkpw(password.encode(), user["password"].encode()):
-        # Update last login
-        conn = get_connection()
-        conn.execute(
-            "UPDATE users SET last_login=? WHERE id=?",
-            (datetime.now(), user["id"])
-        )
-        conn.commit()
-        conn.close()
-        return dict(user)
+def authenticate_user(username_or_email, password):
+    conn = sqlite3.connect("hiresense.db")  # Replace with your actual database filename
+    conn.row_factory = sqlite3.Row
+    cursor = conn.cursor()
+    
+    # Search by either username or email
+    cursor.execute("""
+        SELECT * FROM users 
+        WHERE username = ? OR email = ?
+    """, (username_or_email, username_or_email))
+    
+    user = cursor.fetchone()
+    conn.close()
+    
+    if user:
+        # Convert sqlite3.Row to a standard python dictionary
+        user_dict = dict(user)
+        
+        # Check the hashed password securely
+        stored_password = user_dict["password"]
+        if bcrypt.checkpw(password.encode('utf-8'), stored_password.encode('utf-8')):
+            return user_dict
+            
     return None
 
 
