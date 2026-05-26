@@ -376,7 +376,7 @@ def route():
     if not st.session_state.authenticated:
         page = st.session_state.get("page", "login")
         
-        # 🎯 CRITICAL FIX: Ensure every line inside this block uses exactly 4-space indent multipliers
+        # 🎯 PUBLIC ROUTING BLOCKS
         if page == "signup":
             from modules.signup import show
             show()
@@ -386,13 +386,12 @@ def route():
         else:
             from modules.login import show
             show()
+            
     else:
-        # This handles your logged-in page routing state
-        pass
-        # Authenticated dynamic dashboard view with navigation controls
+        # 🎯 LOGGED-IN DYNAMIC DASHBOARD ROUTING BLOCKS
         render_sidebar()
         page = st.session_state.get("page", "dashboard")
-
+        
         if page == "dashboard":
             from modules.dashboard import show
             show()
@@ -412,13 +411,11 @@ def route():
             from modules.analytics import show
             show()
         elif page == "admin":
-            # Double-check authorization before importing the module
             user_role = st.session_state.user.get("role", "candidate") if "user" in st.session_state else "candidate"
             if user_role == "admin":
                 from modules.admin import show
                 show()
             else:
-                # Redirect unauthorized users straight back to the dashboard
                 st.session_state.page = "dashboard"
                 st.rerun()
 
