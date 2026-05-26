@@ -171,18 +171,10 @@ def authenticate_user(username_or_email, password):
     return None
 
 
-def get_user_by_email(email: str) -> Optional[Dict]:
-    """Fetch user by email."""
-    conn = get_connection()
-    user = conn.execute("SELECT * FROM users WHERE email=?", (email,)).fetchone()
-    conn.close()
-    return dict(user) if user else None
-
-
 def get_user_by_email(email):
     """Fetches a user profile by email safely for password resets."""
     conn = get_connection()
-    conn.row_factory = sqlite3.Row  # 👈 CRITICAL FIX: Ensures result can convert to dict
+    conn.row_factory = sqlite3.Row  
     cursor = conn.cursor()
     
     cursor.execute("SELECT * FROM users WHERE email = ?", (email.strip(),))
