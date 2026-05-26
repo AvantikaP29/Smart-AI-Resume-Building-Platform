@@ -8,8 +8,8 @@ from utils.database import init_db
 def render_sidebar():
  with st.sidebar:
 # 🎨 Page Config & CSS (Your original design)
-st.set_page_config(page_title="HireSense AI", page_icon="🧠", layout="wide")
-st.markdown("""
+ st.set_page_config(page_title="HireSense AI", page_icon="🧠", layout="wide")
+  st.markdown("""
 <style>
     .stButton > button { background: linear-gradient(135deg, #6c63ff, #00d4aa) !important; color: white !important; }
     [data-testid="stAppViewContainer"] { background-color: #0d0f1a !important; color: #e8eaf6 !important; }
