@@ -430,28 +430,22 @@ def render_top_match_tab(prediction, skill_gap, parsed):
 
 def render_all_predictions_tab(all_preds):
     st.markdown("<h3 style='color:#e8eaf6;'>📊 All Role Predictions</h3>", unsafe_allow_html=True)
-
     left, right = st.columns([1.2, 1])
-
+    
     with left:
-        st.markdown("<p style='color:#9fa8da; font-size:0.82rem;'>Confidence score per role</p>",
-                    unsafe_allow_html=True)
-        st.plotly_chart(make_confidence_bar(all_preds), use_container_width=True,
-                        config={"displayModeBar": False})
-
+        st.markdown("<p style='color:#9fa8da; font-size:0.82rem;'>Confidence score per role</p>", unsafe_allow_html=True)
+        st.plotly_chart(make_confidence_bar(all_preds), use_container_width=True, config={"displayModeBar": False})
+        
     with right:
-        st.markdown("<p style='color:#9fa8da; font-size:0.82rem;'>Radar comparison</p>",
-                    unsafe_allow_html=True)
+        st.markdown("<p style='color:#9fa8da; font-size:0.82rem;'>Radar comparison</p>", unsafe_allow_html=True)
         if len(all_preds) >= 3:
-            st.plotly_chart(make_roles_radar(all_preds), use_container_width=True,
-                            config={"displayModeBar": False})
+            st.plotly_chart(make_roles_radar(all_preds), use_container_width=True, config={"displayModeBar": False})
         else:
             st.info("Upload more varied resumes to enable radar comparison.")
-
-    st.markdown("<hr style='border-color:rgba(108,99,255,0.12); margin:20px 0;'>",
-                unsafe_allow_html=True)
+            
+    st.markdown("<hr style='border-color:rgba(108,99,255,0.12); margin:20px 0;'>", unsafe_allow_html=True)
     st.markdown("<h4 style='color:#e8eaf6;'>Role-by-Role Breakdown</h4>", unsafe_allow_html=True)
-
+    
     for i, pred in enumerate(all_preds):
         c  = pred["confidence"]
         cc = conf_color(c)
@@ -459,22 +453,19 @@ def render_all_predictions_tab(all_preds):
         is_top = i == 0
         border = "rgba(108,99,255,0.6)" if is_top else "rgba(108,99,255,0.15)"
         bg     = "rgba(108,99,255,0.08)" if is_top else "#1e2035"
-
+        
+        # 🎯 CRITICAL FIX: The entire card is now wrapped properly in a single master layout block
         st.markdown(f"""
-        <div style="background:{bg}; border:1px solid {border};
-                    border-radius:12px; padding:16px 20px; margin:6px 0;">
-            <div style="display:flex; align-items:center; justify-content:space-between;">
+        <div style="background:{bg}; border:1px solid {border}; border-radius:12px; padding:16px 20px; margin:6px 0; width:100%;">
+            <div style="display:flex; align-items:center; justify-content:space-between; gap:14px; width:100%;">
                 <div style="display:flex; align-items:center; gap:14px;">
-                    <div style="font-size:1.6rem;">{pred.get('icon','💼')}</div>
+                    <div style="font-size:1.6rem; line-height:1;">{pred.get('icon','💼')}</div>
                     <div>
-                        <div style="font-weight:700; color:#e8eaf6;">
-                            {pred['role']}
-                            {"&nbsp;<span style='background:rgba(108,99,255,0.3); color:#6c63ff; "
-                             "padding:2px 8px; border-radius:10px; font-size:0.7rem;'>TOP</span>"
-                             if is_top else ""}
+                        <div style="font-weight:700; color:#e8eaf6; font-size:0.95rem;">
+                            {pred['role']} {"&nbsp;<span style='background:rgba(108,99,255,0.3); color:#6c63ff; padding:2px 8px; border-radius:10px; font-size:0.7rem;'>TOP</span>" if is_top else ""}
                         </div>
-                        <div style="color:#9fa8da; font-size:0.78rem; margin-top:2px;">
-                            {pred.get('description','')[:80]}…
+                        <div style="color:#9fa8da; font-size:0.78rem; margin-top:2px; line-height:1.4;">
+                            {pred.get('description','')[:120]}…
                         </div>
                     </div>
                 </div>
@@ -483,14 +474,12 @@ def render_all_predictions_tab(all_preds):
                     <div style="color:{cc}; font-size:0.72rem; font-weight:600;">{cl}</div>
                 </div>
             </div>
-            <div style="background:rgba(255,255,255,0.07); border-radius:5px;
-                        height:6px; overflow:hidden; margin-top:10px;">
-                <div style="background:{cc}; width:{min(c,100):.0f}%;
-                            height:100%; border-radius:5px;"></div>
+            
+            <div style="background:rgba(255,255,255,0.07); border-radius:5px; height:6px; overflow:hidden; margin-top:12px; width:100%;">
+                <div style="background:{cc}; width:{min(c,100):.0f}%; height:100%; border-radius:5px;"></div>
             </div>
-            {"<div style='color:#9fa8da; font-size:0.75rem; margin-top:6px;'>🔑 Matched: " +
-             ", ".join(pred.get('matched_keywords', [])[:6]) + "</div>"
-             if pred.get('matched_keywords') else ""}
+            
+            {"<div style='color:#9fa8da; font-size:0.75rem; margin-top:8px; display:block;'>🔑 Matched: " + ", ".join(pred.get('matched_keywords', [])[:6]) + "</div>" if pred.get('matched_keywords') else ""}
         </div>
         """, unsafe_allow_html=True)
 
