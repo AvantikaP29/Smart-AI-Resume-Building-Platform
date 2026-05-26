@@ -454,9 +454,11 @@ def render_all_predictions_tab(all_preds):
         border = "rgba(108,99,255,0.6)" if is_top else "rgba(108,99,255,0.15)"
         bg     = "rgba(108,99,255,0.08)" if is_top else "#1e2035"
         
-        # 🎯 CRITICAL FIX: The entire card is now wrapped properly in a single master layout block
+        # 🎯 CRITICAL FIX: The entire matching role card block is enclosed within ONE master string wrapper 
+        matched_skills_html = f"<div style='color:#9fa8da; font-size:0.75rem; margin-top:8px; display:block;'>🔑 Matched: {', '.join(pred.get('matched_keywords', [])[:6])}</div>" if pred.get('matched_keywords') else ""
+        
         st.markdown(f"""
-        <div style="background:{bg}; border:1px solid {border}; border-radius:12px; padding:16px 20px; margin:6px 0; width:100%;">
+        <div style="background:{bg}; border:1px solid {border}; border-radius:12px; padding:16px 20px; margin:12px 0; width:100%;">
             <div style="display:flex; align-items:center; justify-content:space-between; gap:14px; width:100%;">
                 <div style="display:flex; align-items:center; gap:14px;">
                     <div style="font-size:1.6rem; line-height:1;">{pred.get('icon','💼')}</div>
@@ -479,7 +481,7 @@ def render_all_predictions_tab(all_preds):
                 <div style="background:{cc}; width:{min(c,100):.0f}%; height:100%; border-radius:5px;"></div>
             </div>
             
-            {"<div style='color:#9fa8da; font-size:0.75rem; margin-top:8px; display:block;'>🔑 Matched: " + ", ".join(pred.get('matched_keywords', [])[:6]) + "</div>" if pred.get('matched_keywords') else ""}
+            {matched_skills_html}
         </div>
         """, unsafe_allow_html=True)
 
