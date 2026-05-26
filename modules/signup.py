@@ -42,8 +42,9 @@ def show():
                     st.error("Passwords do not match.")
                 elif "@" not in email:
                     st.error("Invalid email address.")
-                else:
-                    result = create_user(username, email, password)
+               else:
+    
+                   result = create_user(username.strip().lower(), email.strip().lower(), password)
                     if result["success"]:
                         st.success("🎉 Account created successfully! Please log in below.")
                         
