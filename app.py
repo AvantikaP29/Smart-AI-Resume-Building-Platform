@@ -6,7 +6,7 @@ import streamlit as st
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from utils.database import init_db
 def render_sidebar():
-with st.sidebar:
+ with st.sidebar:
 # 🎨 Page Config & CSS (Your original design)
 st.set_page_config(page_title="HireSense AI", page_icon="🧠", layout="wide")
 st.markdown("""
