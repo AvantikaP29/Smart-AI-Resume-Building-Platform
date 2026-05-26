@@ -498,31 +498,41 @@ def render_all_predictions_tab(all_preds):
 # ─── TAB 3 : ROLE REQUIREMENTS ────────────────────────────────────────────────
 
 def render_requirements_tab(role, icon):
-    st.markdown(f"<h3 style='color:#e8eaf6;'>{icon} {role} — Requirements</h3>",
-                unsafe_allow_html=True)
-
+    st.markdown(f"<h3 style='color:#e8eaf6;'>{icon} {role} — Requirements</h3>", unsafe_allow_html=True)
     req = get_role_requirements(role)
     if not req:
         st.info("Requirements not available for this role.")
         return
 
-    # Salary banner
-    salary = req.get("avg_salary", "N/A")
+    # 🎯 CRITICAL INR MAP: Calibrate the average salary ranges to Indian Lakhs Per Annum (LPA)
+    salary_ranges = {
+        "Data Scientist":       "₹12,00,000 - ₹24,00,000",
+        "AI/ML Engineer":       "₹15,00,000 - ₹28,00,000",
+        "Web Developer":        "₹7,50,000 - ₹14,00,000",
+        "DevOps Engineer":      "₹10,00,000 - ₹18,00,000",
+        "Cloud Engineer":       "₹11,00,000 - ₹20,00,000",
+        "Cybersecurity Analyst":"₹9,00,000 - ₹16,00,000",
+        "Business Analyst":     "₹8,00,000 - ₹13,00,000",
+        "Python Developer":     "₹8,50,000 - ₹15,00,000"
+    }
+    
+    # Extract matching currency string or fall back gracefully
+    local_salary = salary_ranges.get(role, "₹10,00,000 - ₹18,00,000")
+
+    # 🚀 UPDATED BANNER WITH INR LABELS
     st.markdown(f"""
-    <div style="background:linear-gradient(135deg,rgba(0,212,170,0.12),rgba(108,99,255,0.1));
-                border:1px solid rgba(0,212,170,0.35); border-radius:14px;
-                padding:18px 24px; margin-bottom:24px; display:flex;
-                align-items:center; gap:20px;">
+    <div style="background:linear-gradient(135deg,rgba(0,212,170,0.12),rgba(108,99,255,0.1)); border:1px solid rgba(0,212,170,0.35); border-radius:14px; padding:18px 24px; margin-bottom:24px; display:flex; align-items:center; gap:20px;">
         <div style="font-size:2.5rem;">💰</div>
         <div>
-            <div style="color:#9fa8da; font-size:0.8rem;">Average Salary Range</div>
-            <div style="font-size:1.4rem; font-weight:800; color:#00d4aa;">{salary}</div>
-            <div style="color:#4a5270; font-size:0.75rem;">USD/year · varies by location & seniority</div>
+            <div style="color:#9fa8da; font-size:0.8rem;">Average Salary Range (India)</div>
+            <div style="font-size:1.4rem; font-weight:800; color:#00d4aa;">{local_salary}</div>
+            <div style="color:#4a5270; font-size:0.75rem;">INR/year · varies by location & seniority (LPA metrics)</div>
         </div>
     </div>
     """, unsafe_allow_html=True)
 
     core_col, adv_col = st.columns(2)
+    # ... Rest of your core_skills, tools, and certifications code follows below exactly the same ...
 
     # Core skills
     with core_col:
