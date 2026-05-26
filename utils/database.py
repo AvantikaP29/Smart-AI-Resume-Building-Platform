@@ -13,10 +13,10 @@ from typing import Optional, List, Dict, Any
 DB_PATH = os.path.join(os.path.dirname(os.path.dirname(__file__)), "database.db")
 
 
-# Change this function at the top of utils/database.py
+
 def get_connection():
-    """Returns a fresh connection instance using the persistent DB_PATH."""
-    # 🎯 CRITICAL FIX: Stops creating a temporary file that vanishes on reboots
+    """Returns a fresh connection instance tied securely to your persistent path configuration."""
+    # This prevents the app from creating a temporary database file that gets erased on server reboots!
     return sqlite3.connect(DB_PATH, check_same_thread=False)
 
 @st.cache_resource
@@ -145,10 +145,10 @@ def authenticate_user(username_or_email, password):
     conn.row_factory = sqlite3.Row
     cursor = conn.cursor()
     
-    # Clean input strings safely
+    # 🧼 Strip whitespace and enforce uniform lowercase lookup
     credential = username_or_email.strip().lower()
     
-    # Query case-insensitively using LOWER()
+    # Query your table wrapping column keys in LOWER() to guarantee case-insensitivity
     cursor.execute("""
         SELECT * FROM users 
         WHERE LOWER(username) = ? OR LOWER(email) = ?
@@ -161,7 +161,7 @@ def authenticate_user(username_or_email, password):
         user_dict = dict(user)
         stored_password = user_dict["password"]
         
-        # Securely verify password string
+        # Verify the password match using bcrypt
         if bcrypt.checkpw(password.encode('utf-8'), stored_password.encode('utf-8')):
             return user_dict
             
