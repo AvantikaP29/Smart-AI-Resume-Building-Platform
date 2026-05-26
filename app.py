@@ -14,13 +14,20 @@ def render_sidebar():
     with st.sidebar:
         st.markdown("### 🧠 HireSense AI")
         st.divider()
-        # Ensure these buttons are present and have the correct logic
+        
+        # Navigation Items
         if st.button("🏠 Dashboard", use_container_width=True): 
-            st.session_state.page = "dashboard"
-            st.rerun()
+            st.session_state.page = "dashboard"; st.rerun()
         if st.button("📤 Upload Resume", use_container_width=True): 
-            st.session_state.page = "upload"
-            st.rerun()
+            st.session_state.page = "upload"; st.rerun()
+        if st.button("📊 ATS Analysis", use_container_width=True): 
+            st.session_state.page = "ats"; st.rerun()
+        if st.button("🎯 Job Prediction", use_container_width=True): 
+            st.session_state.page = "prediction"; st.rerun()
+        if st.button("🤖 AI Chatbot", use_container_width=True): 
+            st.session_state.page = "chatbot"; st.rerun()
+            
+        st.divider()
         if st.button("🚪 Logout", use_container_width=True): 
             st.session_state.authenticated = False
             st.session_state.page = "login"
