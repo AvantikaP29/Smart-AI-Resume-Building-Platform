@@ -2,15 +2,28 @@ import os
 import sys
 import streamlit as st 
 
+# Add project root to path to prevent folder resolution bugs
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from utils.database import init_db
 
-st.set_page_config(page_title="HireSense AI", page_icon="🧠", layout="wide")
+# ─── PAGE CONFIG ──────────────────────────────────────────────────────────────
+st.set_page_config(page_title="HireSense AI", page_icon="🧠", layout="wide", initial_sidebar_state="expanded")
 
+# ─── INITIALIZE DATABASE ──────────────────────────────────────────────────────
 if "db_initialized" not in st.session_state:
     init_db()
     st.session_state.db_initialized = True
 
+# ─── GLOBAL CSS (Your original colors) ────────────────────────────────────────
+st.markdown("""
+<style>
+:root { --primary: #6c63ff; --bg-dark: #0d0f1a; --bg-card2: #1e2035; --text-primary: #e8eaf6; }
+html, body, [data-testid="stAppViewContainer"] { background-color: var(--bg-dark) !important; color: var(--text-primary) !important; }
+.stButton > button { background: linear-gradient(135deg, #6c63ff 0%, #00d4aa 100%) !important; color: white !important; }
+</style>
+""", unsafe_allow_html=True)
+
+# ─── SESSION STATE ────────────────────────────────────────────────────────────
 def init_session():
     defaults = {"authenticated": False, "user": None, "page": "login"}
     for k, v in defaults.items():
@@ -18,18 +31,16 @@ def init_session():
             st.session_state[k] = v
 init_session()
 
+# ─── SIDEBAR ──────────────────────────────────────────────────────────────────
 def render_sidebar():
-    if "user" in st.session_state and st.session_state.user:
-        user = st.session_state.user
-    else:
-        user = {"username": "Guest", "role": "candidate"}
-    
     with st.sidebar:
-        st.write(f"Logged in as: {user['username']}")
-        if st.button("Dashboard"): st.session_state.page = "dashboard"; st.rerun()
-        if st.button("Logout"): 
+        st.markdown("### 🧠 HireSense AI")
+        if st.button("Dashboard", use_container_width=True): st.session_state.page = "dashboard"; st.rerun()
+        if st.button("Upload Resume", use_container_width=True): st.session_state.page = "upload"; st.rerun()
+        if st.button("Logout", use_container_width=True): 
             st.session_state.authenticated = False; st.session_state.page = "login"; st.rerun()
 
+# ─── ROUTING ──────────────────────────────────────────────────────────────────
 def route():
     if not st.session_state.authenticated:
         page = st.session_state.get("page", "login")
@@ -47,6 +58,9 @@ def route():
         page = st.session_state.get("page", "dashboard")
         if page == "dashboard":
             from modules.dashboard import show
+            show()
+        elif page == "upload":
+            from modules.upload_resume import show
             show()
         else:
             from modules.login import show
