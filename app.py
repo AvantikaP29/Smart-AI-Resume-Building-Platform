@@ -2,14 +2,21 @@ import os
 import sys
 import streamlit as st 
 
-# Add project root to path
+# 1. Page Config must be first
+st.set_page_config(page_title="HireSense AI", page_icon="🧠", layout="wide")
+
+# 2. Path and Database
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from utils.database import init_db
+
+# 3. Sidebar function (Correctly indented)
 def render_sidebar():
- with st.sidebar:
-# 🎨 Page Config & CSS (Your original design)
- st.set_page_config(page_title="HireSense AI", page_icon="🧠", layout="wide")
-  st.markdown("""
+    with st.sidebar:
+        st.markdown("### 🧠 HireSense AI")
+        # Add your buttons here...
+
+# 4. Global CSS
+st.markdown("""
 <style>
     .stButton > button { background: linear-gradient(135deg, #6c63ff, #00d4aa) !important; color: white !important; }
     [data-testid="stAppViewContainer"] { background-color: #0d0f1a !important; color: #e8eaf6 !important; }
