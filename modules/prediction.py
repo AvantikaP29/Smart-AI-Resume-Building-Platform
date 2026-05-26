@@ -901,7 +901,7 @@ def render_market_tab(role):
     <div style="background:#161829; border:1px solid rgba(108,99,255,0.15);
                 border-top:none; border-radius:0 0 10px 10px;
                 padding:8px 18px; color:#4a5270; font-size:0.72rem;">
-        * Figures are approximate US market ranges. Actual compensation varies by location,
+        * Figures are approximate indian market ranges. Actual compensation varies by location,
         company size, and individual experience.
     </div>
     """, unsafe_allow_html=True)
