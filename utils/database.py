@@ -166,19 +166,44 @@ def authenticate_user(username_or_email, password):
             return user_dict
             
     return None
+# 🎯 ADD THIS TO THE VERY BOTTOM OF utils/database.py
+
 def get_user_by_email(email):
     """Fetches a user profile by email safely for password resets."""
     conn = get_connection()
     conn.row_factory = sqlite3.Row  
     cursor = conn.cursor()
     
-    cursor.execute("SELECT * FROM users WHERE email = ?", (email.strip(),))
+    cursor.execute("SELECT * FROM users WHERE LOWER(email) = ?", (email.strip().lower(),))
     user = cursor.fetchone()
     conn.close()
     
     if user:
         return dict(user)
     return None
+
+
+def update_password(email: str, new_password: str) -> bool:
+    """Updates a user's password securely with a new hash."""
+    import bcrypt
+    conn = get_connection()
+    cursor = conn.cursor()
+    
+    # Hash the brand new password securely
+    hashed_password = bcrypt.hashpw(new_password.encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
+    
+    try:
+        cursor.execute("""
+            UPDATE users 
+            SET password = ? 
+            WHERE LOWER(email) = ?
+        """, (hashed_password, email.strip().lower()))
+        conn.commit()
+        conn.close()
+        return True
+    except Exception:
+        conn.close()
+        return False
 
 
 def get_all_users() -> List[Dict]:
