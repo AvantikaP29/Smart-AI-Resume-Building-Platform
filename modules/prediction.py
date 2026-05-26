@@ -443,8 +443,11 @@ def render_all_predictions_tab(all_preds):
         else:
             st.info("Upload more varied resumes to enable radar comparison.")
             
-    st.markdown("<hr style='border-color:rgba(108,99,255,0.12); margin:20px 0;'>", unsafe_allow_html=True)
-    st.markdown("<h4 style='color:#e8eaf6;'>Role-by-Role Breakdown</h4>", unsafe_allow_html=True)
+    st.markdown(f"""
+    <div style="background:rgba(255,255,255,0.07); border-radius:5px; height:6px; overflow:hidden; margin-top:12px; width:100%;">
+        <div style="background:#6c63ff; width:{role['score']}%; height:100%; border-radius:5px;"></div>
+    </div>
+    """, unsafe_allow_html=True)
     
     for i, pred in enumerate(all_preds):
         c  = pred["confidence"]
