@@ -254,9 +254,10 @@ def get_user_resumes(user_id):
 def get_resume_stats() -> Dict:
     """Get analytics stats for admin dashboard."""
     conn = get_connection()
+    conn.row_factory = sqlite3.Row  # Ensure rows can be queried as dicts
     cursor = conn.cursor()
     
-    total_users = cursor.execute("SELECT COUNT(*) FROM users WHERE role='user'").fetchone()[0]
+    total_users = cursor.execute("SELECT COUNT(*) FROM users WHERE role='candidate'").fetchone()[0]
     total_resumes = cursor.execute("SELECT COUNT(*) FROM resumes").fetchone()[0]
     avg_ats = cursor.execute("SELECT AVG(ats_score) FROM resumes").fetchone()[0]
     
@@ -273,10 +274,24 @@ def get_resume_stats() -> Dict:
         "total_users": total_users,
         "total_resumes": total_resumes,
         "avg_ats": round(avg_ats or 0, 1),
-        "role_distribution": {r["predicted_role"]: r["count"] for r in role_dist},
-        "category_distribution": {c["ats_category"]: c["count"] for c in category_dist}
+        "role_distribution": {r["predicted_role"]: r["count"] for r in role_dist} if role_dist else {},
+        "category_distribution": {c["ats_category"]: c["count"] for c in category_dist} if category_dist else {}
     }
 
+
+# 🎯 NEW HELPER: Add this function right below get_resume_stats()
+def get_salary_benchmarks():
+    """Returns salary benchmarks calibrated for the Indian tech market (LPA)."""
+    return [
+        {"role": "🔬 Data Scientist ⭐ Your match", "entry": "₹6.5L", "mid": "₹12.0L", "senior": "₹24.0L"},
+        {"role": "🤖 AI/ML Engineer", "entry": "₹8.0L", "mid": "₹15.0L", "senior": "₹28.0L"},
+        {"role": "🌐 Web Developer", "entry": "₹4.0L", "mid": "₹7.5L", "senior": "₹14.0L"},
+        {"role": "⚙️ DevOps Engineer", "entry": "₹5.5L", "mid": "₹10.0L", "senior": "₹18.0L"},
+        {"role": "☁️ Cloud Engineer", "entry": "₹6.0L", "mid": "₹11.0L", "senior": "₹20.0L"},
+        {"role": "🛡️ Cybersecurity Analyst", "entry": "₹5.0L", "mid": "₹9.0L", "senior": "₹16.0L"},
+        {"role": "📊 Business Analyst", "entry": "₹4.5L", "mid": "₹8.0L", "senior": "₹13.0L"},
+        {"role": "🐍 Python Developer", "entry": "₹4.5L", "mid": "₹8.5L", "senior": "₹15.0L"}
+    ]
 
 # ─── CHAT HISTORY ────────────────────────────────────────────────────────────
 
