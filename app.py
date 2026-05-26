@@ -12,7 +12,14 @@ from utils.database import init_db
 # 3. Sidebar function (Correctly indented)
 def render_sidebar():
     with st.sidebar:
-        st.markdown("### 🧠 HireSense AI")
+        # 1. Top Branding
+        st.markdown("""
+        <div style="text-align:center; padding: 20px 0;">
+            <div style="font-size:2rem;">🧠</div>
+            <div style="font-weight:700; font-size:1.2rem; color:#6c63ff;">HireSense AI</div>
+        </div>
+        """, unsafe_allow_html=True)
+        
         st.divider()
         
         # Navigation Items
@@ -26,7 +33,16 @@ def render_sidebar():
             st.session_state.page = "prediction"; st.rerun()
         if st.button("🤖 AI Chatbot", use_container_width=True): 
             st.session_state.page = "chatbot"; st.rerun()
-            
+        st.markdown("<div style='flex-grow: 1;'></div>", unsafe_allow_html=True) # Pushes footer down
+        st.divider()
+        st.markdown(
+            """
+            <div style="text-align:center; font-size:0.75rem; color:#888888; padding-bottom: 20px;">
+                HireSense AI v1.0 • Powered by Groq
+            </div>
+            """,
+            unsafe_allow_html=True
+        )   
         st.divider()
         if st.button("🚪 Logout", use_container_width=True): 
             st.session_state.authenticated = False
