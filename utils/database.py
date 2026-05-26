@@ -179,16 +179,19 @@ def get_user_by_email(email: str) -> Optional[Dict]:
     return dict(user) if user else None
 
 
-def update_password(email: str, new_password: str) -> bool:
-    """Update user password."""
+def get_user_by_email(email):
+    """Fetches a user profile by email safely for password resets."""
     conn = get_connection()
-    hashed = bcrypt.hashpw(new_password.encode(), bcrypt.gensalt()).decode()
-    rows = conn.execute(
-        "UPDATE users SET password=? WHERE email=?", (hashed, email)
-    ).rowcount
-    conn.commit()
+    conn.row_factory = sqlite3.Row  # 👈 CRITICAL FIX: Ensures result can convert to dict
+    cursor = conn.cursor()
+    
+    cursor.execute("SELECT * FROM users WHERE email = ?", (email.strip(),))
+    user = cursor.fetchone()
     conn.close()
-    return rows > 0
+    
+    if user:
+        return dict(user)
+    return None
 
 
 def get_all_users() -> List[Dict]:
