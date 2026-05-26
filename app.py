@@ -13,7 +13,18 @@ from utils.database import init_db
 def render_sidebar():
     with st.sidebar:
         st.markdown("### 🧠 HireSense AI")
-        # Add your buttons here...
+        st.divider()
+        # Ensure these buttons are present and have the correct logic
+        if st.button("🏠 Dashboard", use_container_width=True): 
+            st.session_state.page = "dashboard"
+            st.rerun()
+        if st.button("📤 Upload Resume", use_container_width=True): 
+            st.session_state.page = "upload"
+            st.rerun()
+        if st.button("🚪 Logout", use_container_width=True): 
+            st.session_state.authenticated = False
+            st.session_state.page = "login"
+            st.rerun()
 
 # 4. Global CSS
 st.markdown("""
