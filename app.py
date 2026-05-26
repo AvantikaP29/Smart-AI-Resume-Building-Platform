@@ -376,7 +376,7 @@ def route():
     if not st.session_state.authenticated:
         page = st.session_state.get("page", "login")
         
-        # 🎯 PUBLIC ROUTING BLOCKS
+        # 🎯 PUBLIC PAGES: Ensure these have exactly 8 spaces of indentation
         if page == "signup":
             from modules.signup import show
             show()
@@ -388,7 +388,7 @@ def route():
             show()
             
     else:
-        # 🎯 LOGGED-IN DYNAMIC DASHBOARD ROUTING BLOCKS
+        # 🎯 LOGGED-IN DASHBOARD PAGES: Ensure these align perfectly under the else block
         render_sidebar()
         page = st.session_state.get("page", "dashboard")
         
