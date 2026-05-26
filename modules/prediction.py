@@ -846,20 +846,21 @@ def render_market_tab(role):
                 unsafe_allow_html=True)
 
     # Salary table for all roles
-    st.markdown("<h4 style='color:#e8eaf6;'>💵 Salary Benchmarks (USD/year)</h4>",
+    # 🎯 UPDATED HEADER TO INR
+    st.markdown("<h4 style='color:#e8eaf6;'>💵 Salary Benchmarks (INR/annum)</h4>",
                 unsafe_allow_html=True)
 
+    # 🎯 CALIBRATED TECH SALARY DATA (LPA - Lakhs Per Annum)
     salary_data = {
-        "Data Scientist":       ("$70K", "$95K",  "$140K", "🔬"),
-        "AI/ML Engineer":       ("$90K", "$120K", "$165K", "🤖"),
-        "Web Developer":        ("$55K", "$80K",  "$120K", "🌐"),
-        "DevOps Engineer":      ("$75K", "$100K", "$148K", "⚙️"),
-        "Cloud Engineer":       ("$80K", "$110K", "$150K", "☁️"),
-        "Cybersecurity Analyst":("$70K", "$95K",  "$135K", "🛡️"),
-        "Business Analyst":     ("$60K", "$80K",  "$115K", "📊"),
-        "Python Developer":     ("$65K", "$90K",  "$125K", "🐍"),
+        "Data Scientist":       ("₹6.5L", "₹12.0L", "₹24.0L", "🔬"),
+        "AI/ML Engineer":       ("₹8.0L", "₹15.0L", "₹28.0L", "🤖"),
+        "Web Developer":        ("₹4.0L", "₹7.5L",  "₹14.0L", "🌐"),
+        "DevOps Engineer":      ("₹5.5L", "₹10.0L", "₹18.0L", "⚙️"),
+        "Cloud Engineer":       ("₹6.0L", "₹11.0L", "₹20.0L", "☁️"),
+        "Cybersecurity Analyst":("₹5.0L", "₹9.0L",  "₹16.0L", "🛡️"),
+        "Business Analyst":     ("₹4.5L", "₹8.0L",  "₹13.0L", "📊"),
+        "Python Developer":     ("₹4.5L", "₹8.5L",  "₹15.0L", "🐍"),
     }
-
     header = """
     <div style="display:grid; grid-template-columns:2fr 1fr 1fr 1fr;
                 background:#161829; border-radius:10px 10px 0 0;
