@@ -26,6 +26,7 @@ def route():
     
     page = st.session_state.get("page", "login")
     
+    # 1. PUBLIC PAGES (No sidebar)
     if not st.session_state.authenticated:
         if page == "signup":
             from modules.signup import show
@@ -36,10 +37,21 @@ def route():
         else:
             from modules.login import show
             show()
+            
+    # 2. AUTHENTICATED PAGES (Sidebar included)
     else:
-        # Dashboard flow (Your original structure)
-        from modules.dashboard import show
-        show()
+        render_sidebar()  # <--- THIS IS WHERE YOUR SIDEBAR GOES
+        
+        if page == "dashboard":
+            from modules.dashboard import show
+            show()
+        elif page == "upload":
+            from modules.upload_resume import show
+            show()
+        else:
+            # Default to dashboard if page is unrecognized
+            from modules.dashboard import show
+            show()
 
 if __name__ == "__main__":
     route()
