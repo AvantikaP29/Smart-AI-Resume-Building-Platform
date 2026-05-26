@@ -702,6 +702,8 @@ def render_roadmap_tab(role):
         for i, step in enumerate(steps):
             is_last = i == len(steps) - 1
             dot_color = "#00d4aa" if is_last else "#6c63ff"
+            
+            # 🎯 CRITICAL FIX: The wrapper background div is now perfectly opened and closed
             st.markdown(f"""
             <div style="display:flex; align-items:center; gap:16px; margin:8px 0;">
                 <div style="display:flex; flex-direction:column; align-items:center; min-width:32px;">
@@ -711,15 +713,13 @@ def render_roadmap_tab(role):
                                 font-size:0.8rem; font-weight:700; color:{dot_color};">
                         {i+1}
                     </div>
-                    {"" if is_last else
-                     "<div style='width:2px; height:24px; background:rgba(108,99,255,0.3);'></div>"}
+                    {"" if is_last else "<div style='width:2px; height:24px; background:rgba(108,99,255,0.3);'></div>"}
                 </div>
                 <div style="background:#1e2035; border:1px solid {dot_color}40;
                             border-radius:10px; padding:10px 18px; flex:1;
                             color:#e8eaf6; font-weight:{'700' if is_last else '500'};
                             font-size:0.88rem;">
-                    {step}
-                    {"&nbsp; 🏁" if is_last else ""}
+                    {step} {"&nbsp; 🏁" if is_last else ""}
                 </div>
             </div>
             """, unsafe_allow_html=True)
