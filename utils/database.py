@@ -10,15 +10,12 @@ import streamlit as st
 from datetime import datetime
 from typing import Optional, List, Dict, Any
 
-DB_PATH = os.path.join(os.path.dirname(os.path.dirname(__file__)), "database.db")
-
-
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+DB_PATH = os.path.join(BASE_DIR, "database.db")
 
 def get_connection():
-    """Returns a fresh connection instance tied securely to your persistent path configuration."""
-    # This prevents the app from creating a temporary database file that gets erased on server reboots!
+    """Returns a fresh, persistent connection instance to the SQLite database."""
     return sqlite3.connect(DB_PATH, check_same_thread=False)
-
 @st.cache_resource
 def init_db():
     """Initialize database with all required tables exactly once on boot."""
@@ -141,14 +138,15 @@ import sqlite3
 import bcrypt
 
 def authenticate_user(username_or_email, password):
+    """Authenticates a user securely and case-insensitively for both upper and lower case names/emails."""
     conn = get_connection() 
     conn.row_factory = sqlite3.Row
     cursor = conn.cursor()
     
-    # 🧼 Strip whitespace and enforce uniform lowercase lookup
+    # 🧼 Strip accidental spacing and convert input to lowercase
     credential = username_or_email.strip().lower()
     
-    # Query your table wrapping column keys in LOWER() to guarantee case-insensitivity
+    # 🎯 CRITICAL FIX: LOWER(username) and LOWER(email) forces SQLite to ignore upper/lower variations!
     cursor.execute("""
         SELECT * FROM users 
         WHERE LOWER(username) = ? OR LOWER(email) = ?
@@ -161,12 +159,12 @@ def authenticate_user(username_or_email, password):
         user_dict = dict(user)
         stored_password = user_dict["password"]
         
-        # Verify the password match using bcrypt
+        # Verify the password hash accurately matches its encrypted value
         if bcrypt.checkpw(password.encode('utf-8'), stored_password.encode('utf-8')):
             return user_dict
             
     return None
-# 🎯 ADD THIS TO THE VERY BOTTOM OF utils/database.py
+
 
 def get_user_by_email(email):
     """Fetches a user profile by email safely for password resets."""
