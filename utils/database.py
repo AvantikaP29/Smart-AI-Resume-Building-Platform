@@ -104,29 +104,25 @@ def create_user(username, email, password):
     conn.row_factory = sqlite3.Row  
     cursor = conn.cursor()
     
-    # Clean up fields
-    username = username.strip()
-    email = email.strip()
+    # 🎯 FIX: Force lowercase and strip spaces right at entry
+    username = username.strip().lower()
+    email = email.strip().lower()
     
     hashed_password = bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
     
     try:
-        # Insert with role 'candidate'
         cursor.execute("""
             INSERT INTO users (username, email, password, role) 
             VALUES (?, ?, ?, 'candidate')
         """, (username, email, hashed_password))
         conn.commit()
         
-        # Look up row
         cursor.execute("SELECT * FROM users WHERE username = ?", (username,))
         row = cursor.fetchone()
         
-        # 🛡️ BULLETPROOF SAFETY FALLBACK
         if row is not None:
             new_user = dict(row)
         else:
-            # If the database fetch fails to find the row immediately, create the session object manually
             new_user = {
                 "id": cursor.lastrowid,
                 "username": username,
@@ -145,26 +141,27 @@ import sqlite3
 import bcrypt
 
 def authenticate_user(username_or_email, password):
-    # 🎯 FIX: Use the helper so it looks at the exact same file!
     conn = get_connection() 
     conn.row_factory = sqlite3.Row
     cursor = conn.cursor()
     
-    # Search by either username or email
+    # 🎯 FIX: Convert the incoming login entry to lower case
+    credential = username_or_email.strip().lower()
+    
+    # Search the database converting stored fields to lowercase dynamically
     cursor.execute("""
         SELECT * FROM users 
-        WHERE username = ? OR email = ?
-    """, (username_or_email, username_or_email))
+        WHERE LOWER(username) = ? OR LOWER(email) = ?
+    """, (credential, credential))
     
     user = cursor.fetchone()
     conn.close()
     
     if user:
-        # Convert sqlite3.Row to a standard python dictionary
         user_dict = dict(user)
-        
-        # Check the hashed password securely
         stored_password = user_dict["password"]
+        
+        # Verify the password accurately matches its encrypted hash
         if bcrypt.checkpw(password.encode('utf-8'), stored_password.encode('utf-8')):
             return user_dict
             
