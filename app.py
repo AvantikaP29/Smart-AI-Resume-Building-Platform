@@ -115,18 +115,22 @@ def route():
             
     # 2. AUTHENTICATED PAGES (Sidebar included)
     else:
-        render_sidebar()  # <--- THIS IS WHERE YOUR SIDEBAR GOES
+        render_sidebar()
+        page = st.session_state.get("page", "dashboard")
         
+        # --- Routes ---
         if page == "dashboard":
-            from modules.dashboard import show
-            show()
+            from modules.dashboard import show; show()
         elif page == "upload":
-            from modules.upload_resume import show
-            show()
+            from modules.upload_resume import show; show()
+        elif page == "ats":
+            from modules.ats_analysis import show; show()
+        elif page == "prediction":
+            from modules.prediction import show; show()
+        elif page == "chatbot":
+            from modules.chatbot import show; show()
         else:
-            # Default to dashboard if page is unrecognized
-            from modules.dashboard import show
-            show()
-
+            # Fallback to dashboard
+            from modules.dashboard import show; show()
 if __name__ == "__main__":
     route()
