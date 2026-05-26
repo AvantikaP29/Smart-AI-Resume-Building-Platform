@@ -32,7 +32,7 @@ def show():
         st.markdown("<div style='margin-top: 20px;'></div>", unsafe_allow_html=True)
 
        # ... (code above remains the same)
-            col_a, col_b = st.columns(2)
+        col_a, col_b = st.columns(2)
             with col_a:
                 if st.button("✅ Create Account", use_container_width=True):
                     if not all([username, email, password, confirm]):
