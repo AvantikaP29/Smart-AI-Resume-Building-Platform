@@ -33,6 +33,12 @@ def render_sidebar():
             st.session_state.page = "prediction"; st.rerun()
         if st.button("🤖 AI Chatbot", use_container_width=True): 
             st.session_state.page = "chatbot"; st.rerun()
+       
+        st.divider()
+        if st.button("🚪 Logout", use_container_width=True): 
+            st.session_state.authenticated = False
+            st.session_state.page = "login"
+            st.rerun()
         st.markdown("<div style='flex-grow: 1;'></div>", unsafe_allow_html=True) # Pushes footer down
         st.divider()
         st.markdown(
@@ -43,12 +49,6 @@ def render_sidebar():
             """,
             unsafe_allow_html=True
         )   
-        st.divider()
-        if st.button("🚪 Logout", use_container_width=True): 
-            st.session_state.authenticated = False
-            st.session_state.page = "login"
-            st.rerun()
-
 # 4. Global CSS
 st.markdown("""
 <style>
