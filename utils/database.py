@@ -75,7 +75,7 @@ def init_db():
         "SELECT id FROM users WHERE role='admin'"
     ).fetchone()
     NEW_STRONG_PASSWORD = (
-        "YourSuperSecurePassword2026!"  # Change this to your preferred pass
+        "Avantika@#2026"  # Change this to your preferred pass
     )
 
     if not admin_exists:
