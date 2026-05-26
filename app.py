@@ -375,9 +375,6 @@ def render_sidebar():
 def route():
     if not st.session_state.authenticated:
         # Public pages: login / signup / forgot password
-       # Public pages: login / signup / forgot password
-        page = st.session_state.get("page", "login")
-        # Public pages: login / signup / forgot password
         page = st.session_state.get("page", "login")
         if page == "signup":
             from modules.signup import show
