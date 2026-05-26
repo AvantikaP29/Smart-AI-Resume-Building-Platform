@@ -13,11 +13,11 @@ from typing import Optional, List, Dict, Any
 DB_PATH = os.path.join(os.path.dirname(os.path.dirname(__file__)), "database.db")
 
 
+# Change this function at the top of utils/database.py
 def get_connection():
-    """Returns a fresh connection instance with a locked-in filename."""
-    # 🎯 FIX: Make sure this says "hiresense.db" to match your login module!
-    return sqlite3.connect("hiresense.db", check_same_thread=False)
-
+    """Returns a fresh connection instance using the persistent DB_PATH."""
+    # 🎯 CRITICAL FIX: Stops creating a temporary file that vanishes on reboots
+    return sqlite3.connect(DB_PATH, check_same_thread=False)
 
 @st.cache_resource
 def init_db():
@@ -145,10 +145,10 @@ def authenticate_user(username_or_email, password):
     conn.row_factory = sqlite3.Row
     cursor = conn.cursor()
     
-    # 🎯 FIX: Convert the incoming login entry to lower case
+    # Clean input strings safely
     credential = username_or_email.strip().lower()
     
-    # Search the database converting stored fields to lowercase dynamically
+    # Query case-insensitively using LOWER()
     cursor.execute("""
         SELECT * FROM users 
         WHERE LOWER(username) = ? OR LOWER(email) = ?
@@ -161,13 +161,11 @@ def authenticate_user(username_or_email, password):
         user_dict = dict(user)
         stored_password = user_dict["password"]
         
-        # Verify the password accurately matches its encrypted hash
+        # Securely verify password string
         if bcrypt.checkpw(password.encode('utf-8'), stored_password.encode('utf-8')):
             return user_dict
             
     return None
-
-
 def get_user_by_email(email):
     """Fetches a user profile by email safely for password resets."""
     conn = get_connection()
