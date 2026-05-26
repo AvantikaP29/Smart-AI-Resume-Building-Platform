@@ -33,7 +33,7 @@ def show():
 
         col_a, col_b = st.columns(2)
         with col_a:
-            if st.button("✅ Create Account", use_container_width=True):
+if st.button("✅ Create Account", use_container_width=True):
                 if not all([username, email, password, confirm]):
                     st.error("All fields are required.")
                 elif len(password) < 6:
@@ -42,17 +42,13 @@ def show():
                     st.error("Passwords do not match.")
                 elif "@" not in email:
                     st.error("Invalid email address.")
-               else:
-    
-                   result = create_user(username.strip().lower(), email.strip().lower(), password)
+                else:
+                    # Everything is valid, proceed with database creation
+                    result = create_user(username.strip().lower(), email.strip().lower(), password)
                     if result["success"]:
                         st.success("🎉 Account created successfully! Please log in below.")
-                        
-                        # Hard reset authentication states to force manual input
                         st.session_state.authenticated = False
                         st.session_state.user = None
-                        
-                        # Redirect to clean login view
                         st.session_state.page = "login"
                         st.rerun()
                     else:
