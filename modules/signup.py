@@ -33,7 +33,7 @@ def show():
 
        # ... (code above remains the same)
         col_a, col_b = st.columns(2)
-            with col_a:
+        with col_a:
                 if st.button("✅ Create Account", use_container_width=True):
                     if not all([username, email, password, confirm]):
                         st.error("All fields are required.")
