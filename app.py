@@ -374,8 +374,9 @@ def render_sidebar():
 # ─── ROUTING & VIEW CONTROL ───────────────────────────────────────────────────
 def route():
     if not st.session_state.authenticated:
-        # Public pages: login / signup / forgot password
         page = st.session_state.get("page", "login")
+        
+        # 🎯 CRITICAL FIX: Ensure every line inside this block uses exactly 4-space indent multipliers
         if page == "signup":
             from modules.signup import show
             show()
@@ -386,6 +387,8 @@ def route():
             from modules.login import show
             show()
     else:
+        # This handles your logged-in page routing state
+        pass
         # Authenticated dynamic dashboard view with navigation controls
         render_sidebar()
         page = st.session_state.get("page", "dashboard")
