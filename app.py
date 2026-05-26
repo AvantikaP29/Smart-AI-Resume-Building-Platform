@@ -36,8 +36,41 @@ def render_sidebar():
 # 4. Global CSS
 st.markdown("""
 <style>
-    .stButton > button { background: linear-gradient(135deg, #6c63ff, #00d4aa) !important; color: white !important; }
-    [data-testid="stAppViewContainer"] { background-color: #0d0f1a !important; color: #e8eaf6 !important; }
+    /* Original Theme Colors */
+    :root {
+        --primary: #6c63ff;
+        --secondary: #00d4aa;
+        --bg-dark: #0d0f1a;
+        --bg-card: #161829;
+        --text-primary: #e8eaf6;
+        --gradient: linear-gradient(135deg, #6c63ff 0%, #00d4aa 100%);
+    }
+
+    /* Apply background and text colors */
+    [data-testid="stAppViewContainer"] {
+        background-color: var(--bg-dark) !important;
+        color: var(--text-primary) !important;
+    }
+
+    /* Sidebar styling */
+    [data-testid="stSidebar"] {
+        background-color: var(--bg-card) !important;
+    }
+
+    /* Button gradient styling */
+    .stButton > button {
+        background: var(--gradient) !important;
+        color: white !important;
+        border: none !important;
+        border-radius: 8px !important;
+        font-weight: 600 !important;
+    }
+    
+    /* Make buttons look clickable/hoverable */
+    .stButton > button:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(108, 99, 255, 0.4) !important;
+    }
 </style>
 """, unsafe_allow_html=True)
 
