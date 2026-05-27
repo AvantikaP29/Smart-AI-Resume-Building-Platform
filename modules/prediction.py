@@ -195,6 +195,14 @@ def make_all_roles_bar() -> go.Figure:
 # ─── MAIN PAGE ────────────────────────────────────────────────────────────────
 
 def show():
+    if 'user' not in st.session_state or st.session_state.user is None:
+        st.error("Session expired. Please log in again.")
+        st.session_state.page = "login"
+        st.rerun()
+        return
+    
+    # Now it is safe to proceed
+    user = st.session_state.user
     st.markdown("""
     <h1 style='color:#e8eaf6; margin-bottom:4px;'>🎯 Job Role Prediction</h1>
     <p style='color:#9fa8da; margin-bottom:28px;'>
