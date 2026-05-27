@@ -3,6 +3,12 @@ from utils.database import get_user_resumes
 
 
 def show():
+    if 'user' not in st.session_state:
+        st.error("Session expired or user not found. Please login again.")
+        st.session_state.authenticated = False
+        st.session_state.page = "login"
+        st.rerun()
+        return
     user = st.session_state.user
     resumes = get_user_resumes(user["id"])
 
