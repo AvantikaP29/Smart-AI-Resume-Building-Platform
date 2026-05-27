@@ -5,6 +5,7 @@ def show():
     _, col2, _ = st.columns([1, 1.4, 1])
     
     with col2:
+        # Keep your exact styling
         st.markdown("""
         <div style="text-align:center; padding: 30px 15px 20px 0px; width: 100%;">
             <div style="font-size:3.5rem; margin-bottom: 10px; text-align: center;">🧠</div>
@@ -19,16 +20,18 @@ def show():
         </div>
         """, unsafe_allow_html=True)
 
-        # START FORM WRAPPER
+        # THE FIX: Wrap inputs and the creation logic in a form
         with st.form("signup_form"):
             username = st.text_input("Username", placeholder="Choose a unique username")
             email = st.text_input("Email Address", placeholder="your@email.com")
             password = st.text_input("Password", type="password", placeholder="Min 6 characters")
             confirm = st.text_input("Confirm Password", type="password", placeholder="Repeat password")
-            
-            submit_button = st.form_submit_button("✅ Create Account", use_container_width=True)
-            
-            if submit_button:
+
+            # Submit button inside the form
+            submit = st.form_submit_button("✅ Create Account", use_container_width=True)
+
+            if submit:
+                # Validation Logic
                 if not all([username, email, password, confirm]):
                     st.error("All fields are required.")
                 elif len(password) < 6:
@@ -38,16 +41,16 @@ def show():
                 elif "@" not in email:
                     st.error("Invalid email address.")
                 else:
-                    result = create_user(username.strip().lower(), email.strip().lower(), password)
+                    # Database call
+                    result = create_user(username, email, password)
                     if result["success"]:
-                        st.success("🎉 Account created successfully!")
+                        st.success("🎉 Account created successfully! Redirecting...")
                         st.session_state.page = "login"
-                        st.rerun()
+                        st.rerun() # Forces the app to go to login page
                     else:
                         st.error("❌ " + result["message"])
 
-        # BACK BUTTON (Outside the form to avoid submission)
+        # Navigation outside the form
         if st.button("← Back to Login", use_container_width=True):
             st.session_state.page = "login"
             st.rerun()
-
