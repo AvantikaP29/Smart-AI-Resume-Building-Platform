@@ -94,14 +94,15 @@ st.markdown("""
 if "db_initialized" not in st.session_state:
     init_db()
     st.session_state.db_initialized = True
-
 def route():
+    # Ensure authenticated is ALWAYS in session_state
     if "authenticated" not in st.session_state:
         st.session_state.authenticated = False
     
+    # Get the current page
     page = st.session_state.get("page", "login")
-    
-    # 1. PUBLIC PAGES (No sidebar)
+
+    # 1. PUBLIC PAGES (Only show if NOT authenticated)
     if not st.session_state.authenticated:
         if page == "signup":
             from modules.signup import show
@@ -110,27 +111,25 @@ def route():
             from modules.forgot_password import show
             show()
         else:
+            # Default to login if not authenticated
             from modules.login import show
             show()
             
-    # 2. AUTHENTICATED PAGES (Sidebar included)
+    # 2. AUTHENTICATED PAGES (Only show if authenticated)
     else:
         render_sidebar()
-        page = st.session_state.get("page", "dashboard")
-        
-        # --- Routes ---
-        if page == "dashboard":
-            from modules.dashboard import show; show()
-        elif page == "upload":
-            from modules.upload_resume import show; show()
-        elif page == "ats":
-            from modules.ats_analysis import show; show()
-        elif page == "prediction":
-            from modules.prediction import show; show()
-        elif page == "chatbot":
-            from modules.chatbot import show; show()
-        else:
-            # Fallback to dashboard
-            from modules.dashboard import show; show()
+        # Ensure that if they try to access login/signup while logged in, 
+        # they are redirected to dashboard
+        if page in ["login", "signup", "forgot"]:
+            st.session_state.page = "dashboard"
+            st.rerun()
+            
+        if page == "dashboard": from modules.dashboard import show; show()
+        elif page == "upload": from modules.upload_resume import show; show()
+        elif page == "ats": from modules.ats_analysis import show; show()
+        elif page == "prediction": from modules.prediction import show; show()
+        elif page == "chatbot": from modules.chatbot import show; show()
+        else: from modules.dashboard import show; show()
+
 if __name__ == "__main__":
     route()
