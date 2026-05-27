@@ -37,6 +37,7 @@ def show():
                     if user:
                         st.success(f"👋 Welcome back!")
                         st.session_state.authenticated = True
+                        st.session_state.user = user
                         st.session_state.username = username_or_email
                         st.session_state.page = "dashboard"
                         st.rerun() # Forces page to update state immediately
