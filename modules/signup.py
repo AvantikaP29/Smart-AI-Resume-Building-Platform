@@ -1,8 +1,6 @@
 """Signup page module for HireSense AI."""
 import streamlit as st
 from utils.database import create_user
-
-
 def show():
     _, col2, _ = st.columns([1, 1.4, 1])
     
@@ -21,38 +19,35 @@ def show():
         </div>
         """, unsafe_allow_html=True)
 
-        st.markdown("<div style='margin-top: 15px;'></div>", unsafe_allow_html=True)
-
-        # Form fields
-        username = st.text_input("Username", placeholder="Choose a unique username")
-        email = st.text_input("Email Address", placeholder="your@email.com")
-        password = st.text_input("Password", type="password", placeholder="Min 6 characters")
-        confirm = st.text_input("Confirm Password", type="password", placeholder="Repeat password")
-
-        st.markdown("<div style='margin-top: 20px;'></div>", unsafe_allow_html=True)
-
-       # ... (code above remains the same)
-        col_a, col_b = st.columns(2)
-        with col_a:
-                if st.button("✅ Create Account", use_container_width=True):
-                    if not all([username, email, password, confirm]):
-                        st.error("All fields are required.")
-                    elif len(password) < 6:
-                        st.error("Password must be at least 6 characters.")
-                    elif password != confirm:
-                        st.error("Passwords do not match.")
-                    elif "@" not in email:
-                        st.error("Invalid email address.")
+        # START FORM WRAPPER
+        with st.form("signup_form"):
+            username = st.text_input("Username", placeholder="Choose a unique username")
+            email = st.text_input("Email Address", placeholder="your@email.com")
+            password = st.text_input("Password", type="password", placeholder="Min 6 characters")
+            confirm = st.text_input("Confirm Password", type="password", placeholder="Repeat password")
+            
+            submit_button = st.form_submit_button("✅ Create Account", use_container_width=True)
+            
+            if submit_button:
+                if not all([username, email, password, confirm]):
+                    st.error("All fields are required.")
+                elif len(password) < 6:
+                    st.error("Password must be at least 6 characters.")
+                elif password != confirm:
+                    st.error("Passwords do not match.")
+                elif "@" not in email:
+                    st.error("Invalid email address.")
+                else:
+                    result = create_user(username.strip().lower(), email.strip().lower(), password)
+                    if result["success"]:
+                        st.success("🎉 Account created successfully!")
+                        st.session_state.page = "login"
+                        st.rerun()
                     else:
-                        result = create_user(username.strip().lower(), email.strip().lower(), password)
-                        if result["success"]:
-                            st.success("🎉 Account created successfully!")
-                            st.session_state.page = "login"
-                            st.rerun()
-                        else:
-                            st.error("❌ " + result["message"])
-                        
-        with col_b:
-            if st.button("← Back to Login", use_container_width=True):
-                st.session_state.page = "login"
-                st.rerun()
+                        st.error("❌ " + result["message"])
+
+        # BACK BUTTON (Outside the form to avoid submission)
+        if st.button("← Back to Login", use_container_width=True):
+            st.session_state.page = "login"
+            st.rerun()
+
